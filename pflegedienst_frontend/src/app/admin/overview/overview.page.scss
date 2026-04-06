@@ -1,0 +1,20 @@
+.admin-overview {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 100%;
+  padding-top: clamp(88px, 12vw, 128px);
+}
+
+.admin-overview h1 {
+  margin: 0;
+  color: var(--surface-strong);
+  font-size: clamp(32px, 7vw, 52px);
+}
+
+.admin-overview p {
+  margin: 0;
+  max-width: 48ch;
+  color: #475569;
+  line-height: 1.7;
+}

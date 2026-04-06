@@ -1,0 +1,27 @@
+.profile-popover {
+	min-width: 260px;
+	display: grid;
+	gap: 10px;
+}
+
+.profile-popover__role {
+	color: var(--primary-color);
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+h3 {
+	margin: 0;
+	color: var(--surface-strong);
+}
+
+p {
+	margin: 0 0 8px;
+	color: #64748b;
+}
+
+ion-button {
+	--border-radius: 16px;
+}

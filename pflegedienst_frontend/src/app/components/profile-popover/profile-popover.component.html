@@ -1,0 +1,10 @@
+<ion-content *ngIf="user != null" class="ion-padding">
+  <div class="profile-popover">
+    <span class="profile-popover__role">{{ user.role === 'admin' ? 'Administrator' : 'Benutzerkonto' }}</span>
+    <h3>{{ user.name || user.email }}</h3>
+    <p>{{ user.email }}</p>
+
+    <ion-button *ngIf="user.role === 'admin'" expand="block" (click)="openAdmin()">Admin-Panel öffnen</ion-button>
+    <ion-button expand="block" fill="outline" color="danger" (click)="signOut()">Abmelden</ion-button>
+  </div>
+</ion-content>

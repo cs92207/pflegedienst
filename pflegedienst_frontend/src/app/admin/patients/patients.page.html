@@ -1,0 +1,138 @@
+<ion-content>
+  <div class="page-shell patients-page">
+
+    <!-- Header -->
+    <section class="patients-header">
+      <div class="patients-header__info">
+        <h1>Pflegekunden</h1>
+        <p>Verwalte Patienten, Stammdaten, Pflegegrade, Diagnosen, Medikation und alle relevanten Gesundheitsdaten.</p>
+      </div>
+      <div class="patients-header__actions">
+        <div class="patients-header__stats">
+          <div class="stat-card">
+            <strong>{{ totalCount }}</strong>
+            <span>Gesamt</span>
+          </div>
+          <div class="stat-card stat-card--active">
+            <strong>{{ activeCount }}</strong>
+            <span>Aktiv</span>
+          </div>
+        </div>
+        <ion-button (click)="toggleCreateForm()">
+          <ion-icon slot="start" [name]="showCreateForm ? 'close-outline' : 'add-outline'"></ion-icon>
+          {{ showCreateForm ? 'Abbrechen' : 'Neuer Patient' }}
+        </ion-button>
+      </div>
+    </section>
+
+    <!-- Anlegen-Formular -->
+    <section class="patients-create glass-panel" *ngIf="showCreateForm">
+      <h2>Neuen Patienten anlegen</h2>
+      <p>Mindestangaben: Vorname, Nachname und Geburtsdatum. Weitere Daten können anschließend in der Detailansicht ergänzt werden.</p>
+
+      <div class="patients-create__grid">
+        <label>
+          <span>Vorname *</span>
+          <input type="text" [(ngModel)]="newPatient.firstName" placeholder="Vorname" />
+        </label>
+        <label>
+          <span>Nachname *</span>
+          <input type="text" [(ngModel)]="newPatient.lastName" placeholder="Nachname" />
+        </label>
+        <label>
+          <span>Geburtsdatum *</span>
+          <input type="date" [(ngModel)]="newPatient.dateOfBirth" />
+        </label>
+        <label>
+          <span>Geschlecht</span>
+          <select [(ngModel)]="newPatient.gender">
+            <option value="male">Männlich</option>
+            <option value="female">Weiblich</option>
+            <option value="diverse">Divers</option>
+          </select>
+        </label>
+        <label>
+          <span>Telefon</span>
+          <input type="tel" [(ngModel)]="newPatient.phone" placeholder="Optional" />
+        </label>
+        <label>
+          <span>Stadt</span>
+          <input type="text" [(ngModel)]="newPatient.city" placeholder="Optional" />
+        </label>
+      </div>
+
+      <ion-button expand="block" (click)="createPatient()" class="patients-create__submit">
+        Patient anlegen
+      </ion-button>
+    </section>
+
+    <!-- Suche & Filter -->
+    <section class="patients-filters">
+      <div class="patients-filters__search">
+        <ion-icon name="search-outline"></ion-icon>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" placeholder="Nach Name oder Patientennummer suchen..." />
+      </div>
+      <select [(ngModel)]="statusFilter" (change)="onStatusChange()">
+        <option value="">Alle Status</option>
+        <option value="active">Aktiv</option>
+        <option value="inactive">Inaktiv</option>
+        <option value="discharged">Entlassen</option>
+        <option value="deceased">Verstorben</option>
+      </select>
+    </section>
+
+    <!-- Sync-Status -->
+    <div class="patients-sync">
+      <span class="status-chip" [class.status-chip--warning]="isBusy" [class.status-chip--success]="!isBusy">
+        {{ isBusy ? 'Wird geladen…' : patients.length + ' Patienten geladen' }}
+      </span>
+    </div>
+
+    <!-- Patientenliste -->
+    <section class="patients-list">
+      <div class="patient-card glass-panel" *ngFor="let patient of patients">
+        <div class="patient-card__topline">
+          <div class="patient-card__identity" (click)="openPatient(patient)">
+            <div class="patient-card__avatar">{{ patient.firstName.charAt(0) }}{{ patient.lastName.charAt(0) }}</div>
+            <div>
+              <h3>{{ patient.lastName }}, {{ patient.firstName }}</h3>
+              <p class="patient-card__number">{{ patient.patientNumber }}</p>
+            </div>
+          </div>
+          <div class="patient-card__chips">
+            <span class="status-chip" [class.status-chip--success]="patient.status === 'active'" [class.status-chip--warning]="patient.status !== 'active'">
+              {{ statusLabel(patient.status) }}
+            </span>
+            <span class="status-chip status-chip--info" *ngIf="patient.careLevel">
+              {{ careLevelLabel(patient.careLevel) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="patient-card__details">
+          <div *ngIf="patient.dateOfBirth"><strong>Geb.:</strong> {{ patient.dateOfBirth }}</div>
+          <div *ngIf="patient.city"><strong>Ort:</strong> {{ patient.city }}</div>
+          <div *ngIf="patient.phone"><strong>Tel.:</strong> {{ patient.phone }}</div>
+        </div>
+
+        <div class="patient-card__actions">
+          <ion-button fill="outline" size="small" (click)="openPatient(patient)">
+            <ion-icon slot="start" name="open-outline"></ion-icon>
+            Details
+          </ion-button>
+          <ion-button fill="outline" color="danger" size="small" (click)="deletePatient(patient)">
+            <ion-icon slot="start" name="trash-outline"></ion-icon>
+            Löschen
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="patients-empty glass-panel" *ngIf="!isBusy && patients.length === 0">
+        <ion-icon name="people-outline"></ion-icon>
+        <h3>Keine Patienten gefunden</h3>
+        <p>Lege über den Button oben einen neuen Pflegekunden an.</p>
+      </div>
+    </section>
+
+  </div>
+</ion-content>

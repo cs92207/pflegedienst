@@ -1,0 +1,47 @@
+:root {
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --toolbar-color: #0f172a;
+  --primary-color: #0f766e;
+  --primary-color-rgb: 15, 118, 110;
+  --primary-color-contrast: #ffffff;
+  --ion-color-primary: #0f766e;
+  --ion-color-primary-rgb: 15, 118, 110;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #0d655e;
+  --ion-color-primary-tint: #278980;
+  --card-color: #ffffff;
+  --card-color-text: #475569;
+  --contrast: #0f172a;
+  --background: #f3f7f6;
+  --outer-card: #ffffff;
+  --surface-strong: #0f172a;
+  --surface-muted: #e2e8f0;
+  --accent-color: #f59e0b;
+  --accent-color-rgb: 245, 158, 11;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --toolbar-color: #0f172a;
+    --primary-color: #0f766e;
+    --primary-color-rgb: 15, 118, 110;
+    --primary-color-contrast: #ffffff;
+    --ion-color-primary: #0f766e;
+    --ion-color-primary-rgb: 15, 118, 110;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade: #0d655e;
+    --ion-color-primary-tint: #278980;
+    --card-color: #ffffff;
+    --card-color-text: #475569;
+    --contrast: #0f172a;
+    --background: #f3f7f6;
+    --outer-card: #ffffff;
+    --surface-strong: #0f172a;
+    --surface-muted: #e2e8f0;
+    --accent-color: #f59e0b;
+    --accent-color-rgb: 245, 158, 11;
+  }
+}

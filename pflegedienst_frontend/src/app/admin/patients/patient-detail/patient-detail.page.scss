@@ -1,0 +1,337 @@
+.detail-page {
+  display: grid;
+  align-content: start;
+  align-items: start;
+  gap: 20px;
+  padding-top: clamp(88px, 12vw, 128px);
+  padding-bottom: 80px;
+}
+
+// ── Top Bar ─────────────────────────────────────
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.detail-topbar__back {
+  --color: var(--primary-color);
+  margin-right: 8px;
+}
+
+.detail-topbar__info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.detail-topbar__info h1 {
+  margin: 0;
+  font-size: clamp(22px, 3.5vw, 34px);
+  color: var(--surface-strong);
+}
+
+.patient-number {
+  font-family: monospace;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+// ── Tabs ────────────────────────────────────────
+.detail-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 4px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+
+  button {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+    min-height: 48px;
+    height: 100%;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: rgba(var(--primary-color-rgb), 0.06);
+    }
+
+    &.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+  }
+}
+
+// ── Sections ────────────────────────────────────
+.detail-section {
+  align-self: start;
+  padding: 24px;
+  border-radius: 24px;
+
+  h2 {
+    margin: 0 0 16px;
+    color: var(--surface-strong);
+    font-size: 18px;
+  }
+
+  h2 + .form-grid { margin-top: 0; }
+  .form-grid + h2 { margin-top: 28px; }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  h2 { margin: 0; }
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  margin: 28px 0;
+}
+
+// ── Form Grid ───────────────────────────────────
+.form-grid {
+  display: grid;
+  gap: 14px;
+
+  &.form-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  &.form-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  &.form-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  label {
+    display: grid;
+    gap: 8px;
+  }
+
+  .span-2 { grid-column: span 2; }
+
+  span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  input, select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 12px 14px;
+    color: var(--surface-strong);
+  }
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 12px 14px;
+  color: var(--surface-strong);
+  font-family: var(--font-body);
+  resize: vertical;
+}
+
+// ── Tags (Diagnosen, Allergien) ─────────────────
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+}
+
+.tag--warning {
+  background: rgba(var(--accent-color-rgb), 0.12);
+  color: #92400e;
+}
+
+.tag__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0;
+  line-height: 1;
+
+  &:hover { opacity: 1; }
+}
+
+.tag-input {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  input {
+    flex: 1;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 10px 14px;
+    color: var(--surface-strong);
+  }
+}
+
+// ── Cards (Medikamente, Ärzte, Kontakte) ────────
+.medication-card,
+.contact-card {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(248, 250, 252, 0.6);
+  margin-bottom: 12px;
+}
+
+// ── Legal Toggles ───────────────────────────────
+.legal-toggles {
+  display: grid;
+  gap: 14px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+  }
+}
+
+// ── Empty Hint ──────────────────────────────────
+.empty-hint {
+  padding: 18px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+// ── Floating Save ───────────────────────────────
+.detail-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+
+  ion-button {
+    --border-radius: 50%;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    width: 56px;
+    height: 56px;
+  }
+}
+
+// ── Loading ─────────────────────────────────────
+.detail-loading {
+  .skeleton-box {
+    height: 240px;
+  }
+}
+
+// ── Responsive ──────────────────────────────────
+@media (max-width: 1200px) {
+  .form-grid.form-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid.form-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid .span-2 { grid-column: span 1; }
+}
+
+@media (max-width: 767px) {
+  .detail-tabs {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 6px;
+
+    button {
+      flex: 0 0 auto;
+      width: 148px;
+      min-width: 148px;
+      white-space: normal;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .detail-page {
+    gap: 14px;
+    padding-top: 92px;
+  }
+
+  .detail-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-tabs button {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .detail-section {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .form-grid.form-grid--2,
+  .form-grid.form-grid--3,
+  .form-grid.form-grid--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid .span-2 { grid-column: span 1; }
+}
+
+ion-button {
+  --border-radius: 14px;
+}

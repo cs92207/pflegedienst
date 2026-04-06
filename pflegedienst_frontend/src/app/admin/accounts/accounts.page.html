@@ -1,0 +1,94 @@
+<ion-content>
+  <div class="page-shell accounts-page">
+  
+
+    <section class="credential-banner" *ngIf="temporaryPasswordNotice">
+      <div>
+        <span>{{ temporaryPasswordNotice.label }}</span>
+        <strong>{{ temporaryPasswordNotice.email }}</strong>
+      </div>
+      <code>{{ temporaryPasswordNotice.password }}</code>
+    </section>
+
+    <section class="accounts-grid">
+      <article class="accounts-create glass-panel">
+        <h2>Neuen Account anlegen</h2>
+        <p>Lege Benutzer direkt aus dem Admin-Panel an. Das System erzeugt automatisch ein Einmal-Passwort.</p>
+
+        <div class="accounts-form">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="createModel.name" name="name" placeholder="Vor- und Nachname" />
+          </label>
+
+          <label>
+            <span>E-Mail</span>
+            <input type="email" [(ngModel)]="createModel.email" name="email" placeholder="max.mustermann@pflege.de" />
+          </label>
+
+          <label>
+            <span>Rolle</span>
+            <select [(ngModel)]="createModel.role" name="role">
+              <option value="user">Benutzer</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </label>
+
+          <ion-button expand="block" (click)="createAccount()">Account erstellen</ion-button>
+        </div>
+      </article>
+
+      <article class="accounts-list glass-panel">
+        <div class="accounts-list__header">
+          <div>
+            <h2>Bestehende Accounts</h2>
+            <p>Bearbeiten, Rolle ändern, Einmal-Passwort neu ausstellen oder Konten entfernen.</p>
+          </div>
+          <span class="status-chip" [class.status-chip--warning]="isBusy" [class.status-chip--success]="!isBusy">
+            {{ isBusy ? 'Wird geladen' : 'Synchronisiert' }}
+          </span>
+        </div>
+
+        <div class="account-card" *ngFor="let account of accounts">
+          <div class="account-card__topline">
+            <div>
+              <h3>{{ account.name || 'Ohne Namen' }}</h3>
+              <p>{{ account.email }}</p>
+            </div>
+
+            <div class="account-card__chips">
+              <span class="status-chip status-chip--success" *ngIf="account.role === 'admin'">Administrator</span>
+              <span class="status-chip status-chip--warning" *ngIf="account.mustChangePassword">Einmal-Passwort aktiv</span>
+            </div>
+          </div>
+
+          <div class="accounts-edit-grid">
+            <label>
+              <span>Name</span>
+              <input type="text" [(ngModel)]="account.name" [name]="'name-' + account.id" />
+            </label>
+
+            <label>
+              <span>E-Mail</span>
+              <input type="email" [(ngModel)]="account.email" [name]="'email-' + account.id" />
+            </label>
+
+            <label>
+              <span>Rolle</span>
+              <select [(ngModel)]="account.role" [name]="'role-' + account.id">
+                <option value="user">Benutzer</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="account-card__actions">
+            <ion-button fill="outline" (click)="saveAccount(account)">Speichern</ion-button>
+            <ion-button fill="outline" color="warning" (click)="issueTemporaryPassword(account)">Einmal-Passwort neu setzen</ion-button>
+            <ion-button color="danger" [disabled]="isOwnAccount(account)" (click)="deleteAccount(account)">Löschen</ion-button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</ion-content>

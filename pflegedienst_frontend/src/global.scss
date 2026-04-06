@@ -1,0 +1,287 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+
+h1, h2, h3, h4, h5, p {
+  color: black;
+}
+
+html,
+body,
+ion-app,
+ion-content,
+ion-title,
+ion-label,
+ion-button,
+input,
+textarea {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+.display-font {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.skeleton-todo-card {
+  width: 90%;
+  height: 9vh;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eee 25%, #ddd 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+.skeleton-card {
+  width: 40vh;
+  height: 45vh;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eee 25%, #ddd 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(var(--primary-color-rgb), 0.12), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(var(--accent-color-rgb), 0.14), transparent 28%),
+    var(--background);
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 0;
+  margin: 0;
+}
+
+.outer-card {
+  box-shadow: 0px 0px 6px 1px rgba(219,219,219,0.8);
+}
+
+
+ion-content {
+  --background: var(--background);
+}
+
+.page-shell {
+  min-height: 100%;
+  padding: 24px;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-chip--success {
+  background: rgba(22, 163, 74, 0.12);
+  color: #166534;
+}
+
+.status-chip--warning {
+  background: rgba(var(--accent-color-rgb), 0.14);
+  color: #92400e;
+}
+
+.skeleton-box {
+  min-height: 180px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.16) 37%, rgba(255,255,255,0.08) 63%);
+  animation: shine 1.4s ease infinite;
+}
+
+@keyframes shine {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+// Modern Alert Styles
+.modern-alert {
+  --backdrop-opacity: 0.5;
+  
+  .alert-wrapper {
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    background: white;
+  }
+  
+  .alert-head {
+    background: var(--primary-color);
+    color: white;
+    padding: 28px 28px 24px 28px;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  
+  .alert-message {
+    padding: 24px 28px 28px 28px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #444;
+    text-align: center;
+    background: #fafafa;
+  }
+  
+  .alert-button-group {
+    padding: 16px 20px;
+    background: white;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    
+    .alert-button {
+      border-radius: 12px;
+      font-weight: 700;
+      text-transform: none;
+      padding: 14px 32px;
+      transition: all 0.3s ease;
+      flex: 1;
+      max-width: 150px;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      
+      &.alert-button-role-cancel {
+        background: #e8e8e8;
+        color: #666;
+        border: 2px solid transparent;
+        
+        &:hover {
+          background: #d8d8d8;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+      
+      &:not(.alert-button-role-cancel) {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.35);
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(var(--primary-color-rgb), 0.45);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+// Modern Toast Styles
+.modern-toast {
+  --border-radius: 16px;
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+  font-size: 15px;
+  padding: 16px 20px;
+  
+  &.success-toast {
+    --background: var(--primary-color);
+    color: white;
+  }
+  
+  &.error-toast {
+    --background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+  }
+  
+  &.warning-toast {
+    --background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
+  
+  .toast-button {
+    color: white;
+    font-weight: 600;
+    text-transform: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}

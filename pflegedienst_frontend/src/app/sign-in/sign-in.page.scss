@@ -1,0 +1,140 @@
+.signin-page {
+    min-height: 100%;
+    padding: clamp(20px, 4vw, 40px);
+}
+
+.signin-hero {
+    min-height: calc(100vh - 40px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 460px);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.signin-hero__copy {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 5vw, 56px);
+    border-radius: 36px;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(15, 118, 110, 0.88)),
+        url('/assets/images/back.png') center/cover no-repeat;
+    color: white;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.28);
+}
+
+.signin-hero__copy h1 {
+    margin: 22px 0 18px;
+    max-width: 10ch;
+    font-size: clamp(44px, 7vw, 76px);
+    line-height: 0.95;
+    color: white;
+}
+
+.signin-hero__copy p {
+    max-width: 52ch;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+.signin-card {
+    padding: 30px;
+    border-radius: 32px;
+}
+
+.signin-card__logo {
+    width: 112px;
+    height: 112px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, var(--surface-strong), var(--primary-color));
+    box-shadow: 0 18px 40px rgba(var(--primary-color-rgb), 0.28);
+}
+
+.signin-form {
+    display: grid;
+    gap: 18px;
+}
+
+.signin-form h2 {
+    margin: 0 0 8px;
+    color: var(--surface-strong);
+    font-size: 34px;
+}
+
+.signin-form p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.form-field {
+    display: grid;
+    gap: 8px;
+}
+
+.form-field span {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.form-field input {
+    width: 100%;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 16px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 15px 16px;
+    color: var(--surface-strong);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus {
+    outline: none;
+    border-color: rgba(var(--primary-color-rgb), 0.65);
+    box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.12);
+}
+
+ion-button {
+  --background: var(--primary-color);
+  --color: white;
+    --border-radius: 18px;
+    min-height: 54px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+.text-link {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--primary-color);
+    font-weight: 700;
+    justify-self: start;
+}
+
+@media (max-width: 991px) {
+    .signin-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .signin-hero__copy {
+        min-height: 320px;
+    }
+}
+
+@media (max-width: 575px) {
+    .signin-card,
+    .signin-hero__copy {
+        border-radius: 24px;
+}
+
+    .signin-hero__copy h1 {
+        max-width: none;
+        font-size: 42px;
+    }
+}

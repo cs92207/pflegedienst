@@ -1,0 +1,333 @@
+.patients-page {
+  display: grid;
+  align-content: start;
+  align-items: start;
+  gap: 20px;
+  padding-top: clamp(88px, 12vw, 128px);
+}
+
+// ── Header ──────────────────────────────────────
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.patients-header__info h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 4vw, 42px);
+  color: var(--surface-strong);
+}
+
+.patients-header__info p {
+  margin: 0;
+  color: #64748b;
+  max-width: 52ch;
+  line-height: 1.7;
+}
+
+.patients-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.patients-header__stats {
+  display: flex;
+  gap: 10px;
+}
+
+.stat-card {
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+
+  strong {
+    display: block;
+    font-size: 22px;
+    color: var(--surface-strong);
+  }
+
+  span {
+    font-size: 12px;
+    color: #64748b;
+  }
+}
+
+.stat-card--active {
+  background: rgba(var(--primary-color-rgb), 0.08);
+  border-color: rgba(var(--primary-color-rgb), 0.14);
+
+  strong { color: var(--primary-color); }
+}
+
+// ── Create Form ─────────────────────────────────
+.patients-create {
+  padding: 24px;
+  border-radius: 24px;
+
+  h2 {
+    margin: 0 0 6px;
+    color: var(--surface-strong);
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: #64748b;
+    line-height: 1.7;
+  }
+}
+
+.patients-create__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
+  label {
+    display: grid;
+    gap: 8px;
+  }
+
+  span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  input, select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 12px 14px;
+    color: var(--surface-strong);
+  }
+}
+
+.patients-create__submit {
+  margin-top: 18px;
+}
+
+// ── Filters ─────────────────────────────────────
+.patients-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-self: start;
+
+  select {
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 12px 14px;
+    color: var(--surface-strong);
+    min-width: 160px;
+  }
+}
+
+.patients-filters__search {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 0 14px;
+
+  ion-icon {
+    font-size: 18px;
+    color: #94a3b8;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    color: var(--surface-strong);
+    outline: none;
+  }
+}
+
+// ── Sync ────────────────────────────────────────
+.patients-sync {
+  text-align: right;
+  align-self: start;
+
+  .status-chip {
+    display: inline-block;
+    width: auto;
+    min-width: 0;
+    padding: 3px 9px;
+    font-size: 11px;
+    line-height: 1;
+    vertical-align: top;
+  }
+}
+
+// ── Patient Cards ───────────────────────────────
+.patients-list {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+  grid-auto-rows: max-content;
+}
+
+.patient-card {
+  display: grid;
+  align-content: start;
+  align-self: start;
+  gap: 12px;
+  height: fit-content;
+  padding: 18px 20px 16px;
+  border-radius: 22px;
+}
+
+.patient-card__topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.patient-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+
+  &:hover h3 { color: var(--primary-color); }
+}
+
+.patient-card__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.patient-card__identity h3 {
+  margin: 0;
+  color: var(--surface-strong);
+  transition: color 0.15s;
+}
+
+.patient-card__number {
+  margin: 4px 0 0 !important;
+  font-size: 12px;
+  color: #94a3b8 !important;
+  font-family: monospace;
+}
+
+.patient-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-chip--info {
+  background: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+}
+
+.patient-card__details {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #64748b;
+
+  strong { color: #334155; }
+}
+
+.patient-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+// ── Empty State ─────────────────────────────────
+.patients-empty {
+  padding: 48px 24px;
+  border-radius: 24px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    color: var(--surface-strong);
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+  }
+}
+
+// ── Responsive ──────────────────────────────────
+@media (max-width: 1200px) {
+  .patients-create__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .patients-page {
+    gap: 14px;
+    padding-top: 92px;
+  }
+
+  .patients-header {
+    flex-direction: column;
+  }
+
+  .patients-create__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patients-create,
+  .patient-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .patient-card__topline,
+  .patient-card__details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .patient-card__actions ion-button {
+    width: 100%;
+  }
+}
+
+ion-button {
+  --border-radius: 14px;
+}

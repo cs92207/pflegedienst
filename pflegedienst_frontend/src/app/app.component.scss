@@ -1,0 +1,108 @@
+ion-item {
+    --background: transparent;
+    --color: rgba(162, 162, 162, 0.248);
+    --background-activated: transparent;
+    --background-focused: transparent;
+    --background-hover: transparent;
+    --background-selected: transparent;
+    --background-disabled: transparent;
+    --border-color: transparent; /* Korrigiere Tippfehler hier */
+    --box-shadow: none;
+}
+
+ion-header {
+  --box-shadow: none !important;
+  box-shadow: none !important;
+}
+
+ion-toolbar {
+  --box-shadow: none !important;
+  box-shadow: none !important;
+}
+
+#bm ion-icon {
+    margin-right: 1vh;
+}
+
+ion-menu-toggle {
+    --background: transparent;
+}
+
+ion-list {
+    --background: transparent;
+}
+
+a {
+    color:white;
+    font-size: 2vh;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+a:hover {
+    cursor: pointer;
+}
+
+#ap:hover {
+    cursor: pointer;
+}
+
+.app-nav__link {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.app-nav__link--active,
+.app-nav__link:hover {
+    opacity: 1;
+}
+
+ion-menu-button {
+    margin-right: 0;
+}
+
+app-profile-button {
+    margin-right: 8px;
+}
+
+.app-toolbar__menus {
+    gap: 6px;
+    padding-left: 8px;
+}
+
+.app-toolbar__menu-trigger {
+    --color: white;
+    --background: rgba(255, 255, 255, 0.08);
+    --background-hover: rgba(255, 255, 255, 0.14);
+    --background-activated: rgba(255, 255, 255, 0.16);
+    --border-radius: 12px;
+    margin: 0;
+}
+
+.app-toolbar__menu-trigger ion-icon {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+.app-toolbar__menu-trigger--admin {
+    --background: rgba(var(--primary-color-rgb), 0.22);
+}
+
+.app-mobile-menu__item {
+    --color: var(--surface-strong);
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+    --border-radius: 14px;
+    margin: 6px 10px;
+}
+
+.app-mobile-menu__icon {
+    margin-right: 12px;
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+.app-mobile-menu__label {
+    color: var(--surface-strong);
+    font-weight: 600;
+}

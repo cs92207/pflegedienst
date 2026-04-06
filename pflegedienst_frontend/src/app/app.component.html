@@ -1,0 +1,70 @@
+<ion-app>
+  <ion-header>
+    <ion-toolbar class="py-3" style="--background: var(--toolbar-color);">
+      <ion-buttons slot="start" class="d-lg-none app-toolbar__menus">
+        <ion-button
+          *ngIf="canUseAdminMenu"
+          class="app-toolbar__menu-trigger"
+          fill="clear"
+          (click)="openMenu('app-navigation')"
+          aria-label="Hauptnavigation öffnen"
+        >
+          <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
+        </ion-button>
+
+        <ion-button
+          class="app-toolbar__menu-trigger"
+          [class.app-toolbar__menu-trigger--admin]="canUseAdminMenu"
+          fill="clear"
+          (click)="openMenu(canUseAdminMenu ? 'admin-navigation' : 'app-navigation')"
+          [attr.aria-label]="canUseAdminMenu ? 'Admin-Navigation öffnen' : 'Navigation öffnen'"
+        >
+          <ion-icon slot="icon-only" [name]="canUseAdminMenu ? 'apps-outline' : 'menu-outline'"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+
+      <ion-buttons slot="end">
+        <app-profile-button [user]="user"></app-profile-button>
+      </ion-buttons>
+
+      <div id="bm" class="d-none d-lg-flex gap-3 ms-3">
+        <a
+          *ngFor="let item of navigationItems"
+          (click)="navigateTo(item.url)"
+          [class.app-nav__link--active]="isActive(item.url)"
+          class="text-white text-decoration-none app-nav__link"
+        >
+          <span>{{ item.label }}</span>
+        </a>
+      </div>
+
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-menu menuId="app-navigation" style="color: white;" contentId="main-content" class="d-lg-none">
+    <ion-header>
+      <ion-toolbar>
+        <div class="mt-2 mb-2 ms-3" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #028639, #02a045); border-radius: 12px;">
+          <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" fill="white" opacity="0.2"/>
+            <path d="M30 60 L50 30 L70 60" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="50" cy="70" r="5" fill="white"/>
+          </svg>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list>
+        <ion-menu-toggle style="--color: white;" auto-hide="false" *ngFor="let item of navigationItems">
+          <ion-item class="app-mobile-menu__item" (click)="navigateTo(item.url)">
+            <ion-icon class="app-mobile-menu__icon" slot="start" [name]="item.icon"></ion-icon>
+            <ion-label class="app-mobile-menu__label">{{ item.label }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+</ion-app>

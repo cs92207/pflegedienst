@@ -1,0 +1,390 @@
+<ion-content>
+  <div class="page-shell detail-page" *ngIf="!isLoading">
+
+    <!-- Top Bar -->
+    <div class="detail-topbar">
+      <ion-button fill="clear" (click)="goBack()" class="detail-topbar__back">
+        <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+        Zurück
+      </ion-button>
+      <div class="detail-topbar__info">
+        <h1>{{ patient.firstName }} {{ patient.lastName }}</h1>
+        <span class="patient-number">{{ patient.patientNumber }}</span>
+        <span class="status-chip" [class.status-chip--success]="patient.status === 'active'" [class.status-chip--warning]="patient.status !== 'active'">
+          {{ statusLabel(patient.status) }}
+        </span>
+      </div>
+      <ion-button (click)="save()">
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        Speichern
+      </ion-button>
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="detail-tabs">
+      <button [class.active]="activeSection === 'stammdaten'" (click)="activeSection = 'stammdaten'">Stammdaten</button>
+      <button [class.active]="activeSection === 'pflege'" (click)="activeSection = 'pflege'">Pflegedaten</button>
+      <button [class.active]="activeSection === 'medikation'" (click)="activeSection = 'medikation'">Medikation</button>
+      <button [class.active]="activeSection === 'aerzte'" (click)="activeSection = 'aerzte'">Ärzte & Kontakte</button>
+      <button [class.active]="activeSection === 'rechtliches'" (click)="activeSection = 'rechtliches'">Rechtliches</button>
+    </div>
+
+    <!-- ═══════════════ STAMMDATEN ═══════════════ -->
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'stammdaten'">
+      <h2>Persönliche Daten</h2>
+      <div class="form-grid form-grid--3">
+        <label>
+          <span>Vorname</span>
+          <input type="text" [(ngModel)]="patient.firstName" />
+        </label>
+        <label>
+          <span>Nachname</span>
+          <input type="text" [(ngModel)]="patient.lastName" />
+        </label>
+        <label>
+          <span>Geburtsdatum</span>
+          <input type="date" [(ngModel)]="patient.dateOfBirth" />
+        </label>
+        <label>
+          <span>Geschlecht</span>
+          <select [(ngModel)]="patient.gender">
+            <option value="male">Männlich</option>
+            <option value="female">Weiblich</option>
+            <option value="diverse">Divers</option>
+          </select>
+        </label>
+        <label>
+          <span>Status</span>
+          <select [(ngModel)]="patient.status">
+            <option value="active">Aktiv</option>
+            <option value="inactive">Inaktiv</option>
+            <option value="discharged">Entlassen</option>
+            <option value="deceased">Verstorben</option>
+          </select>
+        </label>
+      </div>
+
+      <h2>Kontaktdaten</h2>
+      <div class="form-grid form-grid--3">
+        <label>
+          <span>E-Mail</span>
+          <input type="email" [(ngModel)]="patient.email" placeholder="Optional" />
+        </label>
+        <label>
+          <span>Telefon</span>
+          <input type="tel" [(ngModel)]="patient.phone" placeholder="Festnetz" />
+        </label>
+        <label>
+          <span>Mobiltelefon</span>
+          <input type="tel" [(ngModel)]="patient.mobilePhone" placeholder="Mobil" />
+        </label>
+      </div>
+
+      <h2>Adresse</h2>
+      <div class="form-grid form-grid--4">
+        <label class="span-2">
+          <span>Straße</span>
+          <input type="text" [(ngModel)]="patient.street" />
+        </label>
+        <label>
+          <span>Hausnummer</span>
+          <input type="text" [(ngModel)]="patient.houseNumber" />
+        </label>
+        <label>
+          <span>PLZ</span>
+          <input type="text" [(ngModel)]="patient.zipCode" maxlength="5" />
+        </label>
+        <label class="span-2">
+          <span>Stadt</span>
+          <input type="text" [(ngModel)]="patient.city" />
+        </label>
+      </div>
+
+      <h2>Versicherung</h2>
+      <div class="form-grid form-grid--3">
+        <label>
+          <span>Versicherungsart</span>
+          <select [(ngModel)]="patient.insuranceType">
+            <option value="">– Auswählen –</option>
+            <option value="gesetzlich">Gesetzlich</option>
+            <option value="privat">Privat</option>
+          </select>
+        </label>
+        <label>
+          <span>Krankenkasse</span>
+          <input type="text" [(ngModel)]="patient.insuranceProvider" placeholder="z. B. AOK, TK, Barmer" />
+        </label>
+        <label>
+          <span>Versichertennummer</span>
+          <input type="text" [(ngModel)]="patient.insuranceNumber" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ═══════════════ PFLEGEDATEN ═══════════════ -->
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'pflege'">
+      <h2>Pflegegrad & Zustand</h2>
+      <div class="form-grid form-grid--3">
+        <label>
+          <span>Pflegegrad</span>
+          <select [(ngModel)]="patient.careLevel">
+            <option value="">Kein Pflegegrad</option>
+            <option value="0">Pflegegrad 0</option>
+            <option value="1">Pflegegrad 1</option>
+            <option value="2">Pflegegrad 2</option>
+            <option value="3">Pflegegrad 3</option>
+            <option value="4">Pflegegrad 4</option>
+            <option value="5">Pflegegrad 5</option>
+          </select>
+        </label>
+        <label>
+          <span>Pflegegrad seit</span>
+          <input type="date" [(ngModel)]="patient.careLevelSince" />
+        </label>
+        <label>
+          <span>Wohnsituation</span>
+          <select [(ngModel)]="patient.livingSituation">
+            <option value="">– Auswählen –</option>
+            <option value="allein">Allein lebend</option>
+            <option value="mit_partner">Mit Partner/in</option>
+            <option value="mit_familie">Bei Angehörigen</option>
+            <option value="betreutes_wohnen">Betreutes Wohnen</option>
+            <option value="pflegeheim">Pflegeheim</option>
+          </select>
+        </label>
+        <label>
+          <span>Mobilität</span>
+          <select [(ngModel)]="patient.mobility">
+            <option value="">– Auswählen –</option>
+            <option value="mobil">Mobil</option>
+            <option value="eingeschraenkt">Eingeschränkt mobil</option>
+            <option value="rollstuhl">Rollstuhl</option>
+            <option value="bettlaegerig">Bettlägerig</option>
+          </select>
+        </label>
+        <label>
+          <span>Ernährung</span>
+          <select [(ngModel)]="patient.nutrition">
+            <option value="">– Auswählen –</option>
+            <option value="normal">Normal</option>
+            <option value="diabetes_diaet">Diabetesdiät</option>
+            <option value="sondenkost">Sondenkost</option>
+            <option value="pueriert">Püriert</option>
+            <option value="vegetarisch">Vegetarisch</option>
+            <option value="spezial">Andere Spezialdiät</option>
+          </select>
+        </label>
+        <label>
+          <span>Kommunikationsfähigkeit</span>
+          <select [(ngModel)]="patient.communicationAbility">
+            <option value="">– Auswählen –</option>
+            <option value="normal">Normal</option>
+            <option value="eingeschraenkt">Eingeschränkt</option>
+            <option value="stark_eingeschraenkt">Stark eingeschränkt</option>
+            <option value="nicht_moeglich">Nicht möglich</option>
+          </select>
+        </label>
+      </div>
+
+      <h2>Diagnosen</h2>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let diag of patient.diagnoses; let i = index">
+          {{ diag }}
+          <button class="tag__remove" (click)="removeDiagnosis(i)">&times;</button>
+        </span>
+      </div>
+      <div class="tag-input">
+        <input type="text" [(ngModel)]="newDiagnosis" placeholder="Neue Diagnose eingeben" (keyup.enter)="addDiagnosis()" />
+        <ion-button fill="outline" size="small" (click)="addDiagnosis()">Hinzufügen</ion-button>
+      </div>
+
+      <h2>Allergien</h2>
+      <div class="tag-list">
+        <span class="tag tag--warning" *ngFor="let allergy of patient.allergies; let i = index">
+          {{ allergy }}
+          <button class="tag__remove" (click)="removeAllergy(i)">&times;</button>
+        </span>
+      </div>
+      <div class="tag-input">
+        <input type="text" [(ngModel)]="newAllergy" placeholder="Neue Allergie eingeben" (keyup.enter)="addAllergy()" />
+        <ion-button fill="outline" size="small" (click)="addAllergy()">Hinzufügen</ion-button>
+      </div>
+
+      <h2>Pflegenotizen</h2>
+      <textarea [(ngModel)]="patient.careNotes" rows="6" placeholder="Allgemeine Pflegehinweise, besondere Bedürfnisse..."></textarea>
+    </section>
+
+    <!-- ═══════════════ MEDIKATION ═══════════════ -->
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'medikation'">
+      <div class="section-header">
+        <h2>Medikamentenplan</h2>
+        <ion-button fill="outline" size="small" (click)="addMedication()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Medikament hinzufügen
+        </ion-button>
+      </div>
+
+      <div class="medication-card" *ngFor="let med of patient.medications; let i = index">
+        <div class="form-grid form-grid--2">
+          <label>
+            <span>Medikament</span>
+            <input type="text" [(ngModel)]="med.name" placeholder="z. B. Metformin" />
+          </label>
+          <label>
+            <span>Dosierung</span>
+            <input type="text" [(ngModel)]="med.dosage" placeholder="z. B. 500 mg" />
+          </label>
+          <label>
+            <span>Einnahme</span>
+            <input type="text" [(ngModel)]="med.frequency" placeholder="z. B. 2× täglich" />
+          </label>
+          <label>
+            <span>Hinweise</span>
+            <input type="text" [(ngModel)]="med.notes" placeholder="Optional" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="removeMedication(i)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Entfernen
+        </ion-button>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.medications.length === 0">
+        Keine Medikamente eingetragen. Klicke auf „Medikament hinzufügen".
+      </div>
+    </section>
+
+    <!-- ═══════════════ ÄRZTE & KONTAKTE ═══════════════ -->
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'aerzte'">
+      <div class="section-header">
+        <h2>Behandelnde Ärzte</h2>
+        <ion-button fill="outline" size="small" (click)="addDoctor()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Arzt hinzufügen
+        </ion-button>
+      </div>
+
+      <div class="contact-card" *ngFor="let doc of patient.treatingDoctors; let i = index">
+        <div class="form-grid form-grid--3">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="doc.name" placeholder="Dr. med. …" />
+          </label>
+          <label>
+            <span>Fachrichtung</span>
+            <input type="text" [(ngModel)]="doc.specialty" placeholder="z. B. Allgemeinmedizin" />
+          </label>
+          <label>
+            <span>Telefon</span>
+            <input type="tel" [(ngModel)]="doc.phone" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="removeDoctor(i)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Entfernen
+        </ion-button>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.treatingDoctors.length === 0">
+        Keine Ärzte eingetragen.
+      </div>
+
+      <hr class="section-divider" />
+
+      <div class="section-header">
+        <h2>Notfallkontakte / Angehörige</h2>
+        <ion-button fill="outline" size="small" (click)="addEmergencyContact()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Kontakt hinzufügen
+        </ion-button>
+      </div>
+
+      <div class="contact-card" *ngFor="let c of patient.emergencyContacts; let i = index">
+        <div class="form-grid form-grid--3">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="c.name" />
+          </label>
+          <label>
+            <span>Beziehung</span>
+            <input type="text" [(ngModel)]="c.relationship" placeholder="z. B. Tochter, Ehemann" />
+          </label>
+          <label>
+            <span>Telefon</span>
+            <input type="tel" [(ngModel)]="c.phone" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="removeEmergencyContact(i)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Entfernen
+        </ion-button>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.emergencyContacts.length === 0">
+        Keine Notfallkontakte eingetragen.
+      </div>
+    </section>
+
+    <!-- ═══════════════ RECHTLICHES ═══════════════ -->
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'rechtliches'">
+      <h2>Gesetzlicher Betreuer</h2>
+      <div *ngIf="!patient.legalGuardian" class="empty-hint">
+        Kein Betreuer eingetragen.
+        <ion-button fill="outline" size="small" (click)="ensureLegalGuardian()">Betreuer hinzufügen</ion-button>
+      </div>
+      <div *ngIf="patient.legalGuardian">
+        <div class="form-grid form-grid--3">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="patient.legalGuardian.name" />
+          </label>
+          <label>
+            <span>Beziehung</span>
+            <input type="text" [(ngModel)]="patient.legalGuardian.relationship" placeholder="z. B. Berufsbetreuer" />
+          </label>
+          <label>
+            <span>Telefon</span>
+            <input type="tel" [(ngModel)]="patient.legalGuardian.phone" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="clearLegalGuardian()">Betreuer entfernen</ion-button>
+      </div>
+
+      <hr class="section-divider" />
+
+      <h2>Verfügungen</h2>
+      <div class="legal-toggles">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="patient.hasAdvanceDirective" />
+          <span>Patientenverfügung vorhanden</span>
+        </label>
+        <textarea *ngIf="patient.hasAdvanceDirective" [(ngModel)]="patient.advanceDirectiveNotes" rows="3" placeholder="Hinweise zur Patientenverfügung..."></textarea>
+
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="patient.hasPowerOfAttorney" />
+          <span>Vorsorgevollmacht vorhanden</span>
+        </label>
+        <textarea *ngIf="patient.hasPowerOfAttorney" [(ngModel)]="patient.powerOfAttorneyNotes" rows="3" placeholder="Hinweise zur Vorsorgevollmacht..."></textarea>
+
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="patient.hasDnrOrder" />
+          <span>DNR-Verfügung (Keine Reanimation)</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Floating Save Button (mobile aid) -->
+    <div class="detail-fab">
+      <ion-button (click)="save()" shape="round">
+        <ion-icon slot="icon-only" name="save-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="page-shell detail-page detail-loading" *ngIf="isLoading">
+    <div class="skeleton-box"></div>
+    <div class="skeleton-box"></div>
+  </div>
+</ion-content>

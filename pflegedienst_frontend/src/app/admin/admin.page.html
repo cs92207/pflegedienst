@@ -1,0 +1,40 @@
+<ion-split-pane contentId="admin-content" when="lg" class="admin-shell">
+  <ion-menu menuId="admin-navigation" contentId="admin-content" type="overlay" class="admin-menu">
+    <ion-content class="admin-menu__content">
+      <div class="admin-menu__shell">
+        <div class="admin-menu__brand">
+          <div class="admin-menu__logo">PF</div>
+          <div>
+            <strong>Admin Panel</strong>
+            <p>Pflegedienst Software</p>
+          </div>
+        </div>
+
+        <div class="admin-menu__section">
+          <span>Navigation</span>
+          <ion-list lines="none" class="admin-menu__list">
+            <ion-menu-toggle auto-hide="false" *ngFor="let item of navigationItems">
+              <ion-item class="admin-menu__item" [routerLink]="item.url" (click)="closeMenu()" [class.admin-menu__item--active]="isActive(item.url)">
+                <ion-icon slot="start" [name]="item.icon"></ion-icon>
+                <ion-label>
+                  <strong>{{ item.label }}</strong>
+                  <p>{{ item.detail }}</p>
+                </ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          </ion-list>
+        </div>
+
+        <div class="admin-menu__footer">
+          <span class="status-chip status-chip--success">{{ user?.name || user?.email }}</span>
+          <p>{{ user?.email }}</p>
+          <ion-button expand="block" fill="outline" color="light" (click)="signOut()">Abmelden</ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <div class="admin-content" id="admin-content">
+    <ion-router-outlet></ion-router-outlet>
+  </div>
+</ion-split-pane>

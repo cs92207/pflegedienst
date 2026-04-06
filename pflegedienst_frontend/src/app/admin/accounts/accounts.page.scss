@@ -1,0 +1,257 @@
+.accounts-page {
+  display: grid;
+  gap: 20px;
+  padding-top: clamp(88px, 12vw, 128px);
+}
+
+.accounts-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+  gap: 24px;
+  border-radius: 32px;
+  padding: 28px;
+}
+
+.accounts-hero h1 {
+  margin: 18px 0 12px;
+  max-width: 12ch;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 0.96;
+  color: var(--surface-strong);
+}
+
+.accounts-hero p {
+  margin: 0;
+  max-width: 64ch;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.accounts-hero__stats {
+  display: grid;
+  gap: 14px;
+}
+
+.accounts-hero__stats div {
+  padding: 20px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff, #ecfeff);
+  border: 1px solid rgba(15, 118, 110, 0.12);
+}
+
+.accounts-hero__stats strong {
+  display: block;
+  color: var(--surface-strong);
+  font-size: 34px;
+}
+
+.accounts-hero__stats span {
+  color: #64748b;
+}
+
+.credential-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 24px;
+  background: linear-gradient(120deg, rgba(var(--accent-color-rgb), 0.14), rgba(var(--primary-color-rgb), 0.14));
+  border: 1px solid rgba(var(--accent-color-rgb), 0.18);
+}
+
+.credential-banner span {
+  display: block;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.credential-banner strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--surface-strong);
+  font-size: 18px;
+}
+
+.credential-banner code {
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.35fr);
+  gap: 20px;
+}
+
+.accounts-create,
+.accounts-list {
+  border-radius: 28px;
+  padding: 24px;
+}
+
+.accounts-create h2,
+.accounts-list h2 {
+  margin: 0 0 8px;
+  color: var(--surface-strong);
+}
+
+.accounts-create p,
+.accounts-list p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.accounts-form,
+.accounts-edit-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.accounts-form label,
+.accounts-edit-grid label {
+  display: grid;
+  gap: 8px;
+}
+
+.accounts-form span,
+.accounts-edit-grid span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.accounts-form input,
+.accounts-form select,
+.accounts-edit-grid input,
+.accounts-edit-grid select {
+  max-width: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 14px 16px;
+  color: var(--surface-strong);
+}
+
+.accounts-edit-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.accounts-list__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.account-card {
+  padding: 20px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.account-card + .account-card {
+  margin-top: 16px;
+}
+
+.account-card__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.account-card__topline h3 {
+  margin: 0;
+  color: var(--surface-strong);
+}
+
+.account-card__topline p {
+  margin: 6px 0 0;
+}
+
+.account-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.account-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+ion-button {
+  --border-radius: 16px;
+}
+
+@media (max-width: 1200px) {
+  .accounts-grid,
+  .accounts-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .accounts-edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .accounts-page {
+    gap: 16px;
+    padding-top: 92px;
+  }
+
+  .accounts-hero,
+  .accounts-create,
+  .accounts-list,
+  .account-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .accounts-hero h1 {
+    max-width: none;
+    font-size: clamp(28px, 10vw, 42px);
+  }
+
+  .accounts-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .credential-banner,
+  .accounts-list__header,
+  .account-card__topline {
+    flex-direction: column;
+  }
+
+  .credential-banner code {
+    width: 100%;
+    text-align: center;
+  }
+
+  .account-card__chips {
+    justify-content: flex-start;
+  }
+
+  .account-card__actions ion-button {
+    width: 100%;
+  }
+}
