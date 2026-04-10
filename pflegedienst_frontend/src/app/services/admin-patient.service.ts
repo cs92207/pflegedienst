@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Patient, PatientListItem } from '../models/patient';
+import { Patient, PatientListItem, ResponsibleEmployee } from '../models/patient';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -112,6 +112,7 @@ export class AdminPatientService {
       has_power_of_attorney: p.hasPowerOfAttorney ?? false,
       power_of_attorney_notes: p.powerOfAttorneyNotes || null,
       has_dnr_order: p.hasDnrOrder ?? false,
+      responsible_employee_ids: p.responsibleEmployeeIds ?? p.responsibleEmployees?.map((employee) => employee.id) ?? [],
     };
   }
 
@@ -125,8 +126,12 @@ export class AdminPatientService {
       gender: d?.gender ?? '',
       status: d?.status ?? 'active',
       careLevel: d?.care_level ?? null,
+      street: d?.street ?? null,
+      houseNumber: d?.house_number ?? null,
+      zipCode: d?.zip_code ?? null,
       city: d?.city ?? null,
       phone: d?.phone ?? null,
+      responsibleEmployees: (d?.responsible_users ?? []).map((user: any) => this.normalizeResponsibleEmployee(user)),
       createdAt: d?.created_at ?? '',
     };
   }
@@ -178,8 +183,18 @@ export class AdminPatientService {
       hasPowerOfAttorney: !!d?.has_power_of_attorney,
       powerOfAttorneyNotes: d?.power_of_attorney_notes ?? '',
       hasDnrOrder: !!d?.has_dnr_order,
+      responsibleEmployees: (d?.responsible_users ?? []).map((user: any) => this.normalizeResponsibleEmployee(user)),
+      responsibleEmployeeIds: (d?.responsible_users ?? []).map((user: any) => Number(user?.id ?? 0)).filter((id: number) => id > 0),
       createdAt: d?.created_at ?? '',
       updatedAt: d?.updated_at ?? '',
+    };
+  }
+
+  private normalizeResponsibleEmployee(data: any): ResponsibleEmployee {
+    return {
+      id: Number(data?.id ?? 0),
+      name: data?.name ?? '',
+      email: data?.email ?? '',
     };
   }
 }

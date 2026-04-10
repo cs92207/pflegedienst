@@ -30,6 +30,12 @@ export class AdminPage implements OnInit {
       detail: 'Patienten, Stammdaten und Gesundheitsdaten',
       icon: 'heart-outline',
       url: '/admin/patients',
+    },
+    {
+      label: 'Dienstplan',
+      detail: 'Wöchentliche Routen, Pfleger-Zuweisung und Einmal-Änderungen',
+      icon: 'map-outline',
+      url: '/admin/daily-routes',
     }
   ];
 
@@ -43,6 +49,15 @@ export class AdminPage implements OnInit {
 
   async ngOnInit() {
     this.user = await this.authService.getCurrentUser();
+    await this.menuController.enable(true, 'admin-navigation');
+  }
+
+  async ionViewWillEnter() {
+    await this.menuController.enable(true, 'admin-navigation');
+  }
+
+  async ionViewDidLeave() {
+    await this.menuController.enable(false, 'admin-navigation');
   }
 
   isActive(url: string): boolean {
@@ -55,6 +70,14 @@ export class AdminPage implements OnInit {
 
   async closeMenu() {
     await this.menuController.close('admin-navigation');
+  }
+
+  async navigateTo(url: string) {
+    await this.closeMenu();
+
+    if (this.router.url !== url) {
+      await this.router.navigateByUrl(url);
+    }
   }
 
   async signOut() {

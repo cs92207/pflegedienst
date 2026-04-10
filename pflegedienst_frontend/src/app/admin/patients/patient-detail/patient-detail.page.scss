@@ -116,6 +116,43 @@
   margin: 28px 0;
 }
 
+.caregiver-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.caregiver-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.7);
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--primary-color);
+  }
+
+  strong {
+    display: block;
+    color: var(--surface-strong);
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #64748b;
+    word-break: break-word;
+  }
+}
+
 // ── Form Grid ───────────────────────────────────
 .form-grid {
   display: grid;
@@ -285,6 +322,7 @@ textarea {
   .form-grid.form-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .form-grid.form-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .form-grid .span-2 { grid-column: span 1; }
+  .caregiver-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {

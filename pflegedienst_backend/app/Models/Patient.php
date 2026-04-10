@@ -146,4 +146,26 @@ class Patient extends Model
     {
         return trim("{$this->first_name} {$this->last_name}");
     }
+
+    public function dailyRouteStops()
+    {
+        return $this->hasMany(DailyRouteStop::class);
+    }
+
+    public function weeklyRouteTemplateStops()
+    {
+        return $this->hasMany(WeeklyRouteTemplateStop::class);
+    }
+
+    public function weeklyRouteOverrideStops()
+    {
+        return $this->hasMany(WeeklyRouteOverrideStop::class);
+    }
+
+    public function responsibleUsers()
+    {
+        return $this->belongsToMany(User::class, 'patient_responsible_users')
+            ->withTimestamps()
+            ->orderBy('name');
+    }
 }

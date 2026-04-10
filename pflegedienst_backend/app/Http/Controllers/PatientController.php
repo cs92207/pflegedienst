@@ -14,7 +14,10 @@ class PatientController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Patient::query()->orderBy('last_name')->orderBy('first_name');
+        $query = Patient::query()
+            ->with('responsibleUsers:id,name,email')
+            ->orderBy('last_name')
+            ->orderBy('first_name');
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -41,6 +44,8 @@ class PatientController extends Controller
      */
     public function show(Patient $patient): JsonResponse
     {
+        $patient->loadMissing('responsibleUsers:id,name,email');
+
         return response()->json([
             'success' => 1,
             'patient' => $this->serializeFull($patient),
@@ -54,7 +59,9 @@ class PatientController extends Controller
     {
         $validated = $this->validatePatient($request);
 
-        $patient = Patient::create($validated);
+        $patient = Patient::create($this->extractPatientAttributes($validated));
+        $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
+        $patient->load('responsibleUsers:id,name,email');
 
         return response()->json([
             'success' => 1,
@@ -70,8 +77,10 @@ class PatientController extends Controller
     {
         $validated = $this->validatePatient($request, $patient);
 
-        $patient->fill($validated);
+        $patient->fill($this->extractPatientAttributes($validated));
         $patient->save();
+        $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
+        $patient->load('responsibleUsers:id,name,email');
 
         return response()->json([
             'success' => 1,
@@ -161,7 +170,18 @@ class PatientController extends Controller
             'has_power_of_attorney'     => ['sometimes', 'boolean'],
             'power_of_attorney_notes'   => ['nullable', 'string', 'max:2000'],
             'has_dnr_order'             => ['sometimes', 'boolean'],
+
+            // Zuständige Pfleger
+            'responsible_employee_ids'   => ['sometimes', 'array'],
+            'responsible_employee_ids.*' => ['integer', 'distinct', 'exists:users,id'],
         ]);
+    }
+
+    private function extractPatientAttributes(array $validated): array
+    {
+        unset($validated['responsible_employee_ids']);
+
+        return $validated;
     }
 
     // ── Serialisierung ──────────────────────────────────
@@ -180,8 +200,12 @@ class PatientController extends Controller
             'gender'         => $p->gender,
             'status'         => $p->status,
             'care_level'     => $p->care_level,
+            'street'         => $p->street,
+            'house_number'   => $p->house_number,
+            'zip_code'       => $p->zip_code,
             'city'           => $p->city,
             'phone'          => $p->phone,
+            'responsible_users' => $p->responsibleUsers->map(fn ($user) => $this->serializeResponsibleUser($user))->values(),
             'created_at'     => $p->created_at?->toISOString(),
         ];
     }
@@ -241,9 +265,19 @@ class PatientController extends Controller
             'has_power_of_attorney'   => $p->has_power_of_attorney,
             'power_of_attorney_notes' => $p->power_of_attorney_notes,
             'has_dnr_order'           => $p->has_dnr_order,
+            'responsible_users'       => $p->responsibleUsers->map(fn ($user) => $this->serializeResponsibleUser($user))->values(),
 
             'created_at' => $p->created_at?->toISOString(),
             'updated_at' => $p->updated_at?->toISOString(),
+        ];
+    }
+
+    private function serializeResponsibleUser($user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
         ];
     }
 }

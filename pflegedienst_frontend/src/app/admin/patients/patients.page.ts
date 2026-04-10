@@ -129,6 +129,20 @@ export class PatientsPage implements OnInit {
     return `Pflegegrad ${level}`;
   }
 
+  responsibleEmployeesLabel(patient: PatientListItem): string {
+    const employees = patient.responsibleEmployees ?? [];
+
+    if (!employees.length) {
+      return 'Noch kein zuständiger Pfleger hinterlegt';
+    }
+
+    if (employees.length <= 3) {
+      return employees.map((employee) => employee.name).join(', ');
+    }
+
+    return `${employees.slice(0, 3).map((employee) => employee.name).join(', ')} +${employees.length - 3}`;
+  }
+
   genderLabel(gender: string): string {
     const labels: Record<string, string> = { male: 'Männlich', female: 'Weiblich', diverse: 'Divers' };
     return labels[gender] || gender;

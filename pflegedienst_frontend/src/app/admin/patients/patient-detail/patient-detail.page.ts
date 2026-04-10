@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient, createEmptyPatient, Medication, TreatingDoctor, EmergencyContact } from '../../../models/patient';
+import { User } from '../../../models/user';
+import { AdminAccountService } from '../../../services/admin-account.service';
 import { AdminPatientService } from '../../../services/admin-patient.service';
 import { LoadingService } from '../../../services/loading.service';
 import { PopupService } from '../../../services/popup.service';
@@ -14,6 +16,7 @@ import { PopupService } from '../../../services/popup.service';
 export class PatientDetailPage implements OnInit {
 
   patient: Patient = createEmptyPatient();
+  caregivers: User[] = [];
   isLoading = true;
   activeSection: 'stammdaten' | 'pflege' | 'medikation' | 'aerzte' | 'rechtliches' = 'stammdaten';
 
@@ -23,6 +26,7 @@ export class PatientDetailPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private accountService: AdminAccountService,
     private patientService: AdminPatientService,
     private loadingService: LoadingService,
     private popupService: PopupService,
@@ -40,7 +44,13 @@ export class PatientDetailPage implements OnInit {
   async loadPatient(id: number) {
     this.isLoading = true;
     try {
-      this.patient = await this.patientService.getPatient(id);
+      const [patient, accounts] = await Promise.all([
+        this.patientService.getPatient(id),
+        this.accountService.listAccounts(),
+      ]);
+
+      this.patient = patient;
+      this.caregivers = [...accounts].sort((left, right) => left.name.localeCompare(right.name, 'de'));
     } catch (error: any) {
       this.popupService.showAlert(error?.error?.message || 'Patient konnte nicht geladen werden.');
       this.router.navigateByUrl('/admin/patients');
@@ -126,6 +136,24 @@ export class PatientDetailPage implements OnInit {
 
   clearLegalGuardian() {
     this.patient.legalGuardian = null;
+  }
+
+  isResponsibleEmployee(userId: number): boolean {
+    return this.patient.responsibleEmployeeIds.includes(userId);
+  }
+
+  toggleResponsibleEmployee(user: User) {
+    if (this.isResponsibleEmployee(user.id)) {
+      this.patient.responsibleEmployeeIds = this.patient.responsibleEmployeeIds.filter((id) => id !== user.id);
+      this.patient.responsibleEmployees = this.patient.responsibleEmployees.filter((employee) => employee.id !== user.id);
+      return;
+    }
+
+    this.patient.responsibleEmployeeIds = [...this.patient.responsibleEmployeeIds, user.id];
+    this.patient.responsibleEmployees = [
+      ...this.patient.responsibleEmployees,
+      { id: user.id, name: user.name, email: user.email },
+    ];
   }
 
   statusLabel(status: string): string {

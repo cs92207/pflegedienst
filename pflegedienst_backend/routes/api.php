@@ -4,6 +4,8 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentRequestController;
 use App\Http\Controllers\AppointmentScriptController;
 use App\Http\Controllers\AdminAccountController;
+use App\Http\Controllers\DailyRouteController;
+use App\Http\Controllers\WeeklyRoutePlanController;
 use App\Http\Controllers\PatientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -71,4 +73,17 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('/patients/{patient}', [PatientController::class, 'show']);
     Route::put('/patients/{patient}', [PatientController::class, 'update']);
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy']);
+
+    Route::get('/daily-routes', [DailyRouteController::class, 'index']);
+    Route::post('/daily-routes', [DailyRouteController::class, 'store']);
+    Route::get('/daily-routes/{dailyRoute}', [DailyRouteController::class, 'show']);
+    Route::put('/daily-routes/{dailyRoute}', [DailyRouteController::class, 'update']);
+    Route::delete('/daily-routes/{dailyRoute}', [DailyRouteController::class, 'destroy']);
+
+    Route::get('/weekly-route-plan', [WeeklyRoutePlanController::class, 'index']);
+    Route::post('/weekly-route-plan/templates', [WeeklyRoutePlanController::class, 'storeTemplate']);
+    Route::put('/weekly-route-plan/templates/{weeklyRouteTemplate}', [WeeklyRoutePlanController::class, 'updateTemplate']);
+    Route::delete('/weekly-route-plan/templates/{weeklyRouteTemplate}', [WeeklyRoutePlanController::class, 'destroyTemplate']);
+    Route::put('/weekly-route-plan/templates/{weeklyRouteTemplate}/overrides/{date}', [WeeklyRoutePlanController::class, 'saveOverride']);
+    Route::delete('/weekly-route-plan/templates/{weeklyRouteTemplate}/overrides/{date}', [WeeklyRoutePlanController::class, 'destroyOverride']);
 });

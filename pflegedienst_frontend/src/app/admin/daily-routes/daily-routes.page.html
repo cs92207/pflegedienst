@@ -1,0 +1,510 @@
+<ion-content>
+  <div class="page-shell duty-plan-page" style="margin-top: 72px;">
+    <section class="glass-panel plan-switcher-panel">
+      <div>
+        <span class="section-kicker">{{ activeViewTitle }}</span>
+        <h1>{{ activeViewTitle }}</h1>
+        <p>{{ activeViewDescription }}</p>
+      </div>
+
+      <div class="plan-switcher" role="tablist" aria-label="Ansicht wechseln">
+        <button
+          type="button"
+          class="plan-switcher__button"
+          [class.plan-switcher__button--active]="activePlanView === 'week-plan'"
+          (click)="switchPlanView('week-plan')"
+        >
+          Wochenplan
+        </button>
+        <button
+          type="button"
+          class="plan-switcher__button"
+          [class.plan-switcher__button--active]="activePlanView === 'duty-plan'"
+          (click)="switchPlanView('duty-plan')"
+        >
+          Dienstplan
+        </button>
+      </div>
+    </section>
+
+    <ng-container *ngIf="activePlanView === 'week-plan'; else dutyPlanView">
+    <section class="week-strip glass-panel">
+      <div class="week-strip__header">
+        <div>
+          <h2>Wochenübersicht</h2>
+          <p>{{ isPlanLoading ? 'Woche wird geladen...' : weekLabel }}</p>
+        </div>
+        <div class="week-strip__actions">
+          <ion-button fill="outline" [disabled]="isPlanLoading" (click)="previousWeek()">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Vorherige Woche
+          </ion-button>
+          <ion-button fill="outline" [disabled]="isPlanLoading" (click)="nextWeek()">
+            Nächste Woche
+            <ion-icon slot="end" name="open-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="week-strip__days" *ngIf="!isPlanLoading; else weekDaysSkeleton">
+        <button
+          type="button"
+          class="week-day-card"
+          *ngFor="let day of weekDays; trackBy: trackByDay"
+          [class.week-day-card--active]="selectedDate === day.date"
+          (click)="selectDay(day)"
+        >
+          <span>{{ day.weekdayLabel }}</span>
+          <strong>{{ formatShortDate(day.date) }}</strong>
+          <small style="margin-left: 8px;">{{ day.routes.length }} Route{{ day.routes.length === 1 ? '' : 'n' }}</small>
+        </button>
+      </div>
+
+      <ng-template #weekDaysSkeleton>
+        <div class="week-strip__days week-strip__days--skeleton">
+          <div class="skeleton-box skeleton-box--week-day" *ngFor="let _ of weekDaySkeletons"></div>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="glass-panel day-plan-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Plan für {{ selectedDayLabel || 'die ausgewählte Woche' }}</h2>
+          <p>Hier siehst du, welche Routen in dieser Woche gelten und kannst für einzelne Tage einmalige Änderungen vornehmen.</p>
+        </div>
+      </div>
+
+      <div class="day-routes" *ngIf="isPlanLoading; else dayRoutesContent">
+        <div class="skeleton-box skeleton-box--route" *ngFor="let _ of routeSkeletons"></div>
+      </div>
+
+      <ng-template #dayRoutesContent>
+      <div class="day-routes" *ngIf="selectedDayRoutes.length; else noDayRoutes">
+        <article
+          class="day-route-card"
+          *ngFor="let route of selectedDayRoutes; trackBy: trackByRoute"
+          [class.day-route-card--active]="routeKey(route) === routeKey(selectedRoute || route)"
+          (click)="selectRoute(route)"
+        >
+          <div class="day-route-card__header">
+            <div>
+              <strong>{{ route.routeName }}</strong>
+              <p>{{ route.employee?.name || 'Nicht zugewiesen' }} · {{ route.shiftStartTime || '--:--' }}</p>
+            </div>
+            <div class="day-route-card__chips">
+              <span class="status-chip" [class.status-chip--warning]="route.scope === 'override'" [class.status-chip--success]="route.scope === 'template'">
+                {{ route.scope === 'override' ? 'Einmalig geändert' : 'Aus Dienstplan' }}
+              </span>
+              <span class="status-chip status-chip--warning" *ngIf="route.summary.used_estimated_travel_data">Fahrtzeiten geschätzt</span>
+            </div>
+          </div>
+
+          <div class="day-route-card__meta">
+            <span>{{ route.stops.length }} Kunden</span>
+            <span>{{ route.totalTravelMinutes }} Min Fahrt</span>
+            <span>{{ route.totalServiceMinutes }} Min Pflegezeit</span>
+            <span>{{ formatDistance(route.totalDistanceMeters) }}</span>
+          </div>
+
+          <div class="day-route-card__stops">
+            <div class="day-route-stop" *ngFor="let stop of route.stops">
+              <span>{{ stop.stopOrder }}</span>
+              <div>
+                <strong>{{ stop.patientName }}</strong>
+                <p>{{ stop.arrivalTime || '--:--' }} - {{ stop.departureTime || '--:--' }} · {{ stop.addressLine }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="day-route-card__actions">
+            <ion-button fill="outline" (click)="openRouteDetails(route, $event)">
+              <ion-icon slot="start" name="map-outline"></ion-icon>
+              Route ansehen
+            </ion-button>
+            <ion-button (click)="editOverride(route); $event.stopPropagation()">
+              Einmalig anpassen
+            </ion-button>
+            <ion-button fill="clear" color="warning" *ngIf="route.scope === 'override'" (click)="resetOverride(route, $event)">
+              Änderung zurücksetzen
+            </ion-button>
+          </div>
+        </article>
+      </div>
+      </ng-template>
+
+      <ng-template #noDayRoutes>
+        <div class="empty-state">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <p>Für diesen Tag gibt es im Dienstplan noch keine Route.</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="glass-panel planner-panel" *ngIf="plannerMode === 'edit-override'">
+      <div class="panel-header">
+        <div>
+          <h2>{{ plannerTitle }}</h2>
+          <p>{{ plannerDescription }}</p>
+        </div>
+        <span class="status-chip status-chip--warning">
+          {{ plannerBadgeLabel }}
+        </span>
+      </div>
+
+      <ng-container *ngIf="!isPlannerLoading; else plannerSkeleton">
+      <div class="planner-grid">
+        <label>
+          <span>Routenname</span>
+          <input type="text" [(ngModel)]="routeName" placeholder="z. B. Frühdienst Nord" />
+        </label>
+        <label>
+          <span>Datum</span>
+          <input type="text" [value]="selectedDayLabel + ' · ' + formatDate(selectedDate)" readonly />
+        </label>
+        <label>
+          <span>Pfleger</span>
+          <select [(ngModel)]="employeeId">
+            <option [ngValue]="null">Bitte auswählen</option>
+            <option *ngFor="let employee of employees" [ngValue]="employee.id">{{ employee.name }} · {{ employee.email }}</option>
+          </select>
+        </label>
+        <label>
+          <span>Schichtbeginn</span>
+          <input type="time" [(ngModel)]="shiftStartTime" />
+        </label>
+        <label class="span-2">
+          <span>Startadresse</span>
+          <input type="text" [(ngModel)]="startAddress" placeholder="Optional, z. B. Pflegedienst-Büro" />
+        </label>
+        <label class="span-2">
+          <span>Zieladresse</span>
+          <input type="text" [(ngModel)]="endAddress" placeholder="Optional, z. B. Rückkehr ins Büro" />
+        </label>
+      </div>
+
+      <div class="patients-picker">
+        <div class="patients-picker__header">
+          <div>
+            <h3>Pflegekunden für diese Änderung</h3>
+            <p>Diese Anpassung gilt nur für das ausgewählte Datum.</p>
+          </div>
+          <label class="patients-picker__search">
+            <ion-icon name="search-outline"></ion-icon>
+            <input type="text" [(ngModel)]="patientSearchTerm" placeholder="Suche nach Name, Nummer oder Adresse" />
+          </label>
+        </div>
+
+        <div class="patient-list">
+          <article
+            class="patient-card"
+            *ngFor="let patient of filteredPatients; trackBy: trackByPatientId"
+            [class.patient-card--selected]="isSelected(patient.id)"
+            [class.patient-card--disabled]="!hasCompleteAddress(patient)"
+          >
+            <div class="patient-card__top">
+              <label class="patient-card__toggle">
+                <input type="checkbox" [checked]="isSelected(patient.id)" [disabled]="!hasCompleteAddress(patient)" (change)="togglePatient(patient)" />
+                <span></span>
+              </label>
+              <div>
+                <strong>{{ patient.lastName }}, {{ patient.firstName }}</strong>
+                <p>{{ patient.patientNumber }}</p>
+              </div>
+            </div>
+
+            <p class="patient-card__address">
+              {{ formatPatientAddress(patient) || 'Adresse unvollständig. Bitte Straße, Hausnummer, PLZ und Ort im Pflegekunden ergänzen.' }}
+            </p>
+
+            <div class="patient-card__fields" *ngIf="stopDrafts[patient.id] as stop">
+              <label>
+                <span>Besuchsdauer</span>
+                <input type="number" min="5" step="5" [(ngModel)]="stop.serviceMinutes" />
+              </label>
+              <label>
+                <span>Feste Uhrzeit</span>
+                <input type="time" [(ngModel)]="stop.fixedTime" />
+              </label>
+              <label class="span-2">
+                <span>Notiz</span>
+                <input type="text" [(ngModel)]="stop.notes" placeholder="Optional, z. B. Medikamente mitbringen" />
+              </label>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="planner-actions">
+        <ion-button fill="outline" (click)="switchPlanView('week-plan')">
+          Zurück zum Wochenplan
+        </ion-button>
+        <ion-button (click)="savePlanner()">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          {{ plannerActionLabel }}
+        </ion-button>
+      </div>
+      </ng-container>
+
+      <ng-template #plannerSkeleton>
+        <div class="planner-skeleton">
+          <div class="planner-grid planner-grid--skeleton">
+            <div class="skeleton-box skeleton-box--field" *ngFor="let _ of plannerFieldSkeletons"></div>
+          </div>
+          <div class="patient-list patient-list--skeleton">
+            <div class="skeleton-box skeleton-box--patient" *ngFor="let _ of patientSkeletons"></div>
+          </div>
+        </div>
+      </ng-template>
+    </section>
+    </ng-container>
+
+    <ng-template #dutyPlanView>
+    <div class="duty-plan-layout">
+      <section class="glass-panel global-plan-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Langfristiger Dienstplan</h2>
+            <p>Diese Routen gelten standardmäßig jede Woche, bis du sie anpasst.</p>
+          </div>
+          <ion-button [disabled]="isPlanLoading" (click)="startCreateTemplate()">
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            Neue feste Route
+          </ion-button>
+        </div>
+
+        <div class="weekday-board" *ngIf="!isPlanLoading; else templateBoardSkeleton">
+          <article class="weekday-column" *ngFor="let day of templateGroups">
+            <div class="weekday-column__header">
+              <div>
+                <strong>{{ day.label }}</strong>
+                <span>{{ day.routes.length }} Route{{ day.routes.length === 1 ? '' : 'n' }}</span>
+              </div>
+              <ion-button fill="clear" (click)="startCreateTemplate(day.weekday)">
+                <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+              </ion-button>
+            </div>
+
+            <div class="weekday-column__routes" *ngIf="day.routes.length; else noTemplateRoutes">
+              <div
+                class="plan-route-card"
+                *ngFor="let route of day.routes; trackBy: trackByRoute"
+                role="button"
+                tabindex="0"
+                (click)="editTemplate(route)"
+                (keydown.enter)="editTemplate(route)"
+                (keydown.space)="editTemplate(route); $event.preventDefault()"
+              >
+                <div class="plan-route-card__top">
+                  <div>
+                    <strong>{{ getRouteDisplayName(route, day.label) }}</strong>
+                    <p>{{ route.employee?.name || 'Pfleger noch nicht zugewiesen' }}</p>
+                  </div>
+                  <span class="status-chip status-chip--success">Langfristig</span>
+                </div>
+                <div class="plan-route-card__meta">
+                  <span>{{ route.stops.length || 0 }} Kunden</span>
+                  <span>{{ route.totalServiceMinutes || 0 }} Min Pflegezeit</span>
+                </div>
+                <div class="plan-route-card__actions">
+                  <ion-button fill="outline" size="small" (click)="openRouteDetails(route, $event)">
+                    <ion-icon slot="start" name="map-outline"></ion-icon>
+                    Ansehen
+                  </ion-button>
+                  <ion-button fill="clear" size="small" (click)="editTemplate(route); $event.stopPropagation()">
+                    Bearbeiten
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #noTemplateRoutes>
+              <div class="weekday-column__empty">
+                Noch keine Route angelegt.
+              </div>
+            </ng-template>
+          </article>
+        </div>
+
+        <ng-template #templateBoardSkeleton>
+          <div class="weekday-board weekday-board--skeleton">
+            <div class="skeleton-box skeleton-box--weekday-column" *ngFor="let _ of templateColumnSkeletons"></div>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="glass-panel planner-panel">
+        <div class="panel-header">
+          <div>
+            <h2>{{ plannerTitle }}</h2>
+            <p>{{ plannerDescription }}</p>
+          </div>
+          <span class="status-chip status-chip--success">
+            {{ plannerBadgeLabel }}
+          </span>
+        </div>
+
+        <ng-container *ngIf="!isPlannerLoading; else longTermPlannerSkeleton">
+        <div class="planner-grid">
+          <label>
+            <span>Routenname</span>
+            <input type="text" [(ngModel)]="routeName" placeholder="z. B. Frühdienst Nord" />
+          </label>
+          <label>
+            <span>Wochentag</span>
+            <select [(ngModel)]="plannerWeekday">
+              <option *ngFor="let weekday of weekdays" [ngValue]="weekday.value">{{ weekday.label }}</option>
+            </select>
+          </label>
+          <label>
+            <span>Pfleger</span>
+            <select [(ngModel)]="employeeId">
+              <option [ngValue]="null">Bitte auswählen</option>
+              <option *ngFor="let employee of employees" [ngValue]="employee.id">{{ employee.name }} · {{ employee.email }}</option>
+            </select>
+          </label>
+          <label>
+            <span>Schichtbeginn</span>
+            <input type="time" [(ngModel)]="shiftStartTime" />
+          </label>
+          <label class="span-2">
+            <span>Startadresse</span>
+            <input type="text" [(ngModel)]="startAddress" placeholder="Optional, z. B. Pflegedienst-Büro" />
+          </label>
+          <label class="span-2">
+            <span>Zieladresse</span>
+            <input type="text" [(ngModel)]="endAddress" placeholder="Optional, z. B. Rückkehr ins Büro" />
+          </label>
+        </div>
+
+        <div class="patients-picker">
+          <div class="patients-picker__header">
+            <div>
+              <h3>Pflegekunden für diese Route</h3>
+              <p>Kunden ohne vollständige Adresse bleiben markiert und können nicht ausgewählt werden.</p>
+            </div>
+            <label class="patients-picker__search">
+              <ion-icon name="search-outline"></ion-icon>
+              <input type="text" [(ngModel)]="patientSearchTerm" placeholder="Suche nach Name, Nummer oder Adresse" />
+            </label>
+          </div>
+
+          <div class="patient-list">
+            <article
+              class="patient-card"
+              *ngFor="let patient of filteredPatients; trackBy: trackByPatientId"
+              [class.patient-card--selected]="isSelected(patient.id)"
+              [class.patient-card--disabled]="!hasCompleteAddress(patient)"
+            >
+              <div class="patient-card__top">
+                <label class="patient-card__toggle">
+                  <input type="checkbox" [checked]="isSelected(patient.id)" [disabled]="!hasCompleteAddress(patient)" (change)="togglePatient(patient)" />
+                  <span></span>
+                </label>
+                <div>
+                  <strong>{{ patient.lastName }}, {{ patient.firstName }}</strong>
+                  <p>{{ patient.patientNumber }}</p>
+                </div>
+              </div>
+
+              <p class="patient-card__address">
+                {{ formatPatientAddress(patient) || 'Adresse unvollständig. Bitte Straße, Hausnummer, PLZ und Ort im Pflegekunden ergänzen.' }}
+              </p>
+
+              <div class="patient-card__fields" *ngIf="stopDrafts[patient.id] as stop">
+                <label>
+                  <span>Besuchsdauer</span>
+                  <input type="number" min="5" step="5" [(ngModel)]="stop.serviceMinutes" />
+                </label>
+                <label>
+                  <span>Feste Uhrzeit</span>
+                  <input type="time" [(ngModel)]="stop.fixedTime" />
+                </label>
+                <label class="span-2">
+                  <span>Notiz</span>
+                  <input type="text" [(ngModel)]="stop.notes" placeholder="Optional, z. B. Medikamente mitbringen" />
+                </label>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="planner-actions">
+          <ion-button fill="outline" (click)="startCreateTemplate()">
+            Zurücksetzen
+          </ion-button>
+          <ion-button (click)="savePlanner()">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            {{ plannerActionLabel }}
+          </ion-button>
+        </div>
+        </ng-container>
+
+        <ng-template #longTermPlannerSkeleton>
+          <div class="planner-skeleton">
+            <div class="planner-grid planner-grid--skeleton">
+              <div class="skeleton-box skeleton-box--field" *ngFor="let _ of plannerFieldSkeletons"></div>
+            </div>
+            <div class="patient-list patient-list--skeleton">
+              <div class="skeleton-box skeleton-box--patient" *ngFor="let _ of patientSkeletons"></div>
+            </div>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+    </ng-template>
+  </div>
+
+  <ion-modal
+    [isOpen]="isRouteDetailsOpen"
+    cssClass="route-details-modal"
+    (didPresent)="onRouteDetailsDidPresent()"
+    (didDismiss)="onRouteDetailsDidDismiss()"
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Routendetails</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeRouteDetails()">
+              <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <div class="route-details-sheet" *ngIf="routeDetailsRoute as route">
+          <section class="route-details-sheet__hero">
+            <div>
+              <h2>{{ getRouteDetailTitle(route) }}</h2>
+              <p>{{ getRouteDetailDateLabel(route) }}</p>
+            </div>
+          </section>
+
+          <section class="route-details-sheet__list glass-panel">
+            <article class="route-details-line" *ngFor="let line of getRouteDetailLines(route)">
+              <strong>{{ line.label }}:</strong>
+              <div>
+                <span>{{ line.title }}</span>
+                <small *ngIf="line.meta">{{ line.meta }}</small>
+              </div>
+            </article>
+          </section>
+
+          <section class="route-details-sheet__map-card glass-panel">
+
+            <div class="route-details-sheet__map" #routeDetailMap *ngIf="hasMapPreview(route); else noRouteMap"></div>
+
+            <ng-template #noRouteMap>
+              <div class="empty-state">
+                <ion-icon name="map-outline"></ion-icon>
+                <p>Für diese Route sind noch keine Kartendaten verfügbar.</p>
+              </div>
+            </ng-template>
+          </section>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

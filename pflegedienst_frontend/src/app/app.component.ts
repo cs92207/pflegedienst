@@ -2,15 +2,15 @@ import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { MenuController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { addOutline, appsOutline, arrowBackOutline, closeOutline, gridOutline, heartOutline, homeOutline, menuOutline, openOutline, peopleOutline, saveOutline, searchOutline, shieldCheckmarkOutline, trashOutline } from 'ionicons/icons';
+import { addOutline, appsOutline, arrowBackOutline, calendarOutline, carOutline, closeOutline, gridOutline, heartOutline, homeOutline, locateOutline, mapOutline, menuOutline, openOutline, peopleOutline, saveOutline, searchOutline, shieldCheckmarkOutline, timeOutline, trashOutline } from 'ionicons/icons';
 import { filter } from 'rxjs';
 import { User } from './models/user';
 import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
   standalone: false,
 })
 export class AppComponent {
@@ -26,27 +26,34 @@ export class AppComponent {
       addOutline,
       appsOutline,
       arrowBackOutline,
+      calendarOutline,
+      carOutline,
       closeOutline,
       gridOutline,
       heartOutline,
       homeOutline,
+      locateOutline,
+      mapOutline,
       menuOutline,
       openOutline,
       peopleOutline,
       saveOutline,
       searchOutline,
       shieldCheckmarkOutline,
+      timeOutline,
       trashOutline,
     });
   }
 
   async ngOnInit() {
     await this.loadUser();
+    await this.syncMenus();
 
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.loadUser();
+      .subscribe(async () => {
+        await this.loadUser();
+        await this.syncMenus();
       });
   }
 
@@ -73,7 +80,12 @@ export class AppComponent {
   }
 
   async openMenu(menuId: 'app-navigation' | 'admin-navigation') {
-    await this.menuController.open(menuId);
+    const isOpen = await this.menuController.open(menuId);
+
+    if (!isOpen) {
+      await this.syncMenus();
+      await this.menuController.open(menuId);
+    }
   }
 
   async navigateTo(url: string) {
@@ -84,5 +96,12 @@ export class AppComponent {
 
   private async loadUser() {
     this.user = await this.authService.getCurrentUser();
+  }
+
+  private async syncMenus() {
+    const shouldUseAdminMenu = this.canUseAdminMenu;
+
+    await this.menuController.enable(!shouldUseAdminMenu, 'app-navigation');
+    await this.menuController.enable(shouldUseAdminMenu, 'admin-navigation');
   }
 }

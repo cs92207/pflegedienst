@@ -115,6 +115,19 @@
           <div *ngIf="patient.phone"><strong>Tel.:</strong> {{ patient.phone }}</div>
         </div>
 
+        <div class="patient-card__responsibility">
+          <strong>Zuständige Pfleger</strong>
+          <p>{{ responsibleEmployeesLabel(patient) }}</p>
+          <div class="patient-card__responsibility-chips" *ngIf="patient.responsibleEmployees.length; else noResponsibleEmployees">
+            <span class="status-chip status-chip--info" *ngFor="let employee of patient.responsibleEmployees">
+              {{ employee.name }}
+            </span>
+          </div>
+          <ng-template #noResponsibleEmployees>
+            <span class="status-chip status-chip--warning">Bitte im Pflegekunden hinterlegen</span>
+          </ng-template>
+        </div>
+
         <div class="patient-card__actions">
           <ion-button fill="outline" size="small" (click)="openPatient(patient)">
             <ion-icon slot="start" name="open-outline"></ion-icon>

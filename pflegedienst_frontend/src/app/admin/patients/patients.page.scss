@@ -256,6 +256,32 @@
   strong { color: #334155; }
 }
 
+.patient-card__responsibility {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+
+  strong {
+    color: #334155;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+.patient-card__responsibility-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .patient-card__actions {
   display: flex;
   gap: 10px;

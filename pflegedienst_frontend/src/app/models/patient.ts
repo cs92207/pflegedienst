@@ -23,6 +23,12 @@ export interface LegalGuardian {
   relationship: string;
 }
 
+export interface ResponsibleEmployee {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export interface PatientListItem {
   id: number;
   patientNumber: string;
@@ -32,8 +38,12 @@ export interface PatientListItem {
   gender: string;
   status: string;
   careLevel: string | null;
+  street: string | null;
+  houseNumber: string | null;
+  zipCode: string | null;
   city: string | null;
   phone: string | null;
+  responsibleEmployees: ResponsibleEmployee[];
   createdAt: string;
 }
 
@@ -87,6 +97,8 @@ export interface Patient {
   hasPowerOfAttorney: boolean;
   powerOfAttorneyNotes: string;
   hasDnrOrder: boolean;
+  responsibleEmployees: ResponsibleEmployee[];
+  responsibleEmployeeIds: number[];
 
   createdAt: string;
   updatedAt: string;
@@ -129,6 +141,8 @@ export function createEmptyPatient(): Patient {
     hasPowerOfAttorney: false,
     powerOfAttorneyNotes: '',
     hasDnrOrder: false,
+    responsibleEmployees: [],
+    responsibleEmployeeIds: [],
     createdAt: '',
     updatedAt: '',
   };

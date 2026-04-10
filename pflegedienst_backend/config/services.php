@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'openstreetmap' => [
+        'nominatim_url' => env('OSM_NOMINATIM_URL', 'https://nominatim.openstreetmap.org'),
+        'osrm_url' => env('OSRM_URL', 'https://router.project-osrm.org'),
+        'user_agent' => env('OSM_USER_AGENT', env('APP_NAME', 'Pflegedienst') . '/1.0'),
+        'verify_ssl' => env('OSM_VERIFY_SSL'),
+    ],
+
 ];

@@ -62,6 +62,44 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function assignedDailyRoutes()
+    {
+        return $this->hasMany(DailyRoute::class, 'employee_id');
+    }
+
+    public function plannedDailyRoutes()
+    {
+        return $this->hasMany(DailyRoute::class, 'planner_id');
+    }
+
+    public function assignedWeeklyRouteTemplates()
+    {
+        return $this->hasMany(WeeklyRouteTemplate::class, 'employee_id');
+    }
+
+    public function plannedWeeklyRouteTemplates()
+    {
+        return $this->hasMany(WeeklyRouteTemplate::class, 'planner_id');
+    }
+
+    public function assignedWeeklyRouteOverrides()
+    {
+        return $this->hasMany(WeeklyRouteOverride::class, 'employee_id');
+    }
+
+    public function plannedWeeklyRouteOverrides()
+    {
+        return $this->hasMany(WeeklyRouteOverride::class, 'planner_id');
+    }
+
+    public function responsiblePatients()
+    {
+        return $this->belongsToMany(Patient::class, 'patient_responsible_users')
+            ->withTimestamps()
+            ->orderBy('last_name')
+            ->orderBy('first_name');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

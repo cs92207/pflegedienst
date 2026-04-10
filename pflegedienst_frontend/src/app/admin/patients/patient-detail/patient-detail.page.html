@@ -64,6 +64,23 @@
         </label>
       </div>
 
+      <h2>Zuständige Pfleger</h2>
+      <div class="caregiver-grid" *ngIf="caregivers.length; else noCaregivers">
+        <label class="caregiver-card" *ngFor="let caregiver of caregivers">
+          <input type="checkbox" [checked]="isResponsibleEmployee(caregiver.id)" (change)="toggleResponsibleEmployee(caregiver)" />
+          <div>
+            <strong>{{ caregiver.name }}</strong>
+            <p>{{ caregiver.email }}</p>
+          </div>
+        </label>
+      </div>
+
+      <ng-template #noCaregivers>
+        <div class="empty-hint">
+          Es wurden noch keine Pfleger-Konten angelegt.
+        </div>
+      </ng-template>
+
       <h2>Kontaktdaten</h2>
       <div class="form-grid form-grid--3">
         <label>
