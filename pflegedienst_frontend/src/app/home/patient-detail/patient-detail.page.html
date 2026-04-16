@@ -1,0 +1,359 @@
+<ion-content [fullscreen]="true">
+  <div class="detail-action-overlay" *ngIf="isActionLoading">
+    <div class="detail-action-overlay__card glass-panel">
+      <div class="detail-action-overlay__spinner" aria-hidden="true"></div>
+      <strong>{{ actionLoadingMessage || 'Wird verarbeitet...' }}</strong>
+      <p>Bitte kurz warten. Die Daten werden aktualisiert.</p>
+    </div>
+  </div>
+
+  <div class="page-shell caregiver-patient-detail" style="margin-top: 128px;" *ngIf="!isLoading; else loadingState">
+    <article class="detail-message glass-panel" *ngIf="errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <div>
+        <h2>Hinweis</h2>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </article>
+
+    <section class="detail-hero glass-panel" *ngIf="!errorMessage">
+      <div class="detail-hero__topbar">
+        <button type="button" class="nav-button" (click)="goBack()">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+          Zur Pflegekundenliste
+        </button>
+        <span class="status-chip" [class.status-chip--success]="patient.status === 'active'" [class.status-chip--warning]="patient.status !== 'active'">
+          {{ statusLabel(patient.status) }}
+        </span>
+      </div>
+
+      <div class="detail-hero__content">
+        <div>
+          <span class="section-kicker">Pflegekundendetails</span>
+          <h1>{{ patientName }}</h1>
+          <p>
+            {{ patient.patientNumber }} | Pflegegrad {{ displayValue(patient.careLevel, 'offen') }} |
+            {{ displayValue(patient.city) }}
+          </p>
+        </div>
+
+        <div class="detail-hero__facts">
+          <div>
+            <span>Nächste Dokumentation</span>
+            <strong>{{ patient.visits.length }} {{ patient.visits.length === 1 ? 'Besuch' : 'Besuche' }}</strong>
+          </div>
+          <div>
+            <span>Standard-Todos</span>
+            <strong>{{ patient.defaultTodos.length }}</strong>
+          </div>
+          <div>
+            <span>Telefon</span>
+            <strong>{{ displayValue(patient.phone) }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="detail-tabs" *ngIf="!errorMessage">
+      <button [class.active]="activeSection === 'besuche'" (click)="activeSection = 'besuche'">Besuche</button>
+      <button [class.active]="activeSection === 'stammdaten'" (click)="activeSection = 'stammdaten'">Stammdaten</button>
+      <button [class.active]="activeSection === 'pflege'" (click)="activeSection = 'pflege'">Pflegedaten</button>
+      <button [class.active]="activeSection === 'medikation'" (click)="activeSection = 'medikation'">Medikation</button>
+      <button [class.active]="activeSection === 'kontakte'" (click)="activeSection = 'kontakte'">Kontakte</button>
+      <button [class.active]="activeSection === 'rechtliches'" (click)="activeSection = 'rechtliches'">Rechtliches</button>
+      <button [class.active]="activeSection === 'leistungen'" (click)="activeSection = 'leistungen'">Leistungen</button>
+      <button [class.active]="activeSection === 'standards'" (click)="activeSection = 'standards'">Standard-Todos</button>
+    </div>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'besuche' && !errorMessage">
+      <div class="section-header">
+        <div>
+          <h2>Besuche und Dokumentation</h2>
+          <p>Hier siehst du alle Besuche kompakt. Für Todos und Doku öffnest du den jeweiligen Besuch im Vollbild.</p>
+        </div>
+      </div>
+
+      <article class="editor-card editor-card--new">
+        <h3>Besuch erstellen</h3>
+        <div class="editor-grid editor-grid--visit">
+          <label>
+            <span>Datum</span>
+            <input type="date" [(ngModel)]="newVisitDate" />
+          </label>
+          <label>
+            <span>Von</span>
+            <input type="time" [(ngModel)]="newVisitStartTime" />
+          </label>
+          <label>
+            <span>Bis</span>
+            <input type="time" [(ngModel)]="newVisitEndTime" />
+          </label>
+          <label class="span-3">
+            <span>Kurznotiz</span>
+            <textarea rows="3" [(ngModel)]="newVisitNotes" placeholder="Optional für den ersten Eintrag"></textarea>
+          </label>
+        </div>
+        <button type="button" class="action-button" (click)="createVisit()" [disabled]="isCreatingVisit">
+          {{ isCreatingVisit ? 'Besuch wird angelegt...' : 'Besuch anlegen' }}
+        </button>
+      </article>
+
+      <div class="visit-list" *ngIf="sortedVisits.length; else emptyVisits">
+        <button type="button" class="visit-list-card" *ngFor="let visit of sortedVisits; trackBy: trackVisit" (click)="openVisit(visit)">
+          <div class="visit-list-card__header">
+            <div>
+              <h3>{{ formatDate(visit.visitDate) }}</h3>
+              <p>{{ visit.startTime }} - {{ displayValue(visit.endTime, 'offen') }}</p>
+            </div>
+            <span class="status-chip" [class.status-chip--success]="visit.isReleasedToAdmin" [class.status-chip--warning]="!visit.isReleasedToAdmin">
+              {{ visit.isReleasedToAdmin ? 'Freigegeben' : 'Privat' }}
+            </span>
+          </div>
+          <div class="visit-list-card__meta">
+            <span>{{ visit.todos.length }} Todos</span>
+            <span>{{ visit.createdByUser?.name || 'Pfleger' }}</span>
+            <span>{{ formatDateTime(visit.updatedAt || visit.createdAt) }}</span>
+          </div>
+          <div class="visit-list-card__footer">
+            <span>{{ visit.notes ? 'Mit Dokumentation' : 'Noch ohne Dokumentation' }}</span>
+            <strong>Besuch öffnen</strong>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'stammdaten' && !errorMessage">
+      <h2>Persönliche Daten</h2>
+      <div class="info-grid info-grid--3">
+        <article><span>Vorname</span><strong>{{ displayValue(patient.firstName) }}</strong></article>
+        <article><span>Nachname</span><strong>{{ displayValue(patient.lastName) }}</strong></article>
+        <article><span>Geburtsdatum</span><strong>{{ formatDate(patient.dateOfBirth) }}</strong></article>
+        <article><span>Geschlecht</span><strong>{{ genderLabel(patient.gender) }}</strong></article>
+        <article><span>E-Mail</span><strong>{{ displayValue(patient.email) }}</strong></article>
+        <article><span>Telefon</span><strong>{{ displayValue(patient.phone) }}</strong></article>
+        <article><span>Mobiltelefon</span><strong>{{ displayValue(patient.mobilePhone) }}</strong></article>
+        <article class="span-2"><span>Adresse</span><strong>{{ displayValue(patient.street) }} {{ displayValue(patient.houseNumber, '') }}</strong></article>
+        <article><span>PLZ / Ort</span><strong>{{ displayValue(patient.zipCode) }} {{ displayValue(patient.city, '') }}</strong></article>
+        <article><span>Versicherung</span><strong>{{ displayValue(patient.insuranceType) }}</strong></article>
+        <article><span>Krankenkasse</span><strong>{{ displayValue(patient.insuranceProvider) }}</strong></article>
+        <article><span>Versichertennummer</span><strong>{{ displayValue(patient.insuranceNumber) }}</strong></article>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'pflege' && !errorMessage">
+      <h2>Pflegedaten</h2>
+      <div class="info-grid info-grid--3">
+        <article><span>Pflegegrad</span><strong>{{ displayValue(patient.careLevel, 'Kein Pflegegrad') }}</strong></article>
+        <article><span>Seit</span><strong>{{ patient.careLevelSince ? formatDate(patient.careLevelSince) : 'Nicht hinterlegt' }}</strong></article>
+        <article><span>Wohnsituation</span><strong>{{ displayValue(patient.livingSituation) }}</strong></article>
+        <article><span>Mobilität</span><strong>{{ displayValue(patient.mobility) }}</strong></article>
+        <article><span>Ernährung</span><strong>{{ displayValue(patient.nutrition) }}</strong></article>
+        <article><span>Kommunikation</span><strong>{{ displayValue(patient.communicationAbility) }}</strong></article>
+      </div>
+
+      <div class="detail-columns">
+        <article class="sub-panel">
+          <h3>Diagnosen</h3>
+          <div class="chip-list" *ngIf="patient.diagnoses.length; else emptyDiagnoses">
+            <span class="data-chip" *ngFor="let diagnosis of patient.diagnoses">{{ diagnosis }}</span>
+          </div>
+        </article>
+
+        <article class="sub-panel">
+          <h3>Allergien</h3>
+          <div class="chip-list" *ngIf="patient.allergies.length; else emptyAllergies">
+            <span class="data-chip data-chip--warning" *ngFor="let allergy of patient.allergies">{{ allergy }}</span>
+          </div>
+        </article>
+      </div>
+
+      <article class="sub-panel">
+        <h3>Pflegenotizen</h3>
+        <p class="long-text">{{ displayValue(patient.careNotes, 'Noch keine allgemeinen Pflegenotizen hinterlegt.') }}</p>
+      </article>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'medikation' && !errorMessage">
+      <h2>Medikation</h2>
+      <div class="card-stack" *ngIf="patient.medications.length; else emptyMedication">
+        <article class="info-card" *ngFor="let medication of patient.medications">
+          <h3>{{ medication.name }}</h3>
+          <p>{{ formatMedication(medication) }}</p>
+          <small>{{ displayValue(medication.notes, 'Keine zusätzlichen Hinweise') }}</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'kontakte' && !errorMessage">
+      <h2>Ärzte und Kontakte</h2>
+      <div class="detail-columns">
+        <article class="sub-panel">
+          <h3>Behandelnde Ärzte</h3>
+          <div class="card-stack" *ngIf="patient.treatingDoctors.length; else emptyDoctors">
+            <article class="info-card" *ngFor="let doctor of patient.treatingDoctors">
+              <h4>{{ doctor.name }}</h4>
+              <p>{{ displayValue(doctor.specialty) }}</p>
+              <small>{{ displayValue(doctor.phone) }}</small>
+            </article>
+          </div>
+        </article>
+
+        <article class="sub-panel">
+          <h3>Notfallkontakte</h3>
+          <div class="card-stack" *ngIf="patient.emergencyContacts.length; else emptyContacts">
+            <article class="info-card" *ngFor="let contact of patient.emergencyContacts">
+              <h4>{{ contact.name }}</h4>
+              <p>{{ displayValue(contact.relationship) }}</p>
+              <small>{{ displayValue(contact.phone) }}</small>
+            </article>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'rechtliches' && !errorMessage">
+      <h2>Rechtliche Angaben</h2>
+      <div class="info-grid info-grid--3">
+        <article><span>Patientenverfügung</span><strong>{{ booleanLabel(patient.hasAdvanceDirective) }}</strong></article>
+        <article><span>Vorsorgevollmacht</span><strong>{{ booleanLabel(patient.hasPowerOfAttorney) }}</strong></article>
+        <article><span>DNR-Verfügung</span><strong>{{ booleanLabel(patient.hasDnrOrder) }}</strong></article>
+      </div>
+
+      <div class="detail-columns">
+        <article class="sub-panel">
+          <h3>Gesetzlicher Betreuer</h3>
+          <p class="long-text" *ngIf="patient.legalGuardian; else noGuardian">
+            {{ patient.legalGuardian.name }}<br />
+            {{ displayValue(patient.legalGuardian.relationship) }}<br />
+            {{ displayValue(patient.legalGuardian.phone) }}
+          </p>
+        </article>
+
+        <article class="sub-panel">
+          <h3>Zusatzhinweise</h3>
+          <p class="long-text">Patientenverfügung: {{ displayValue(patient.advanceDirectiveNotes, 'Keine Hinweise') }}</p>
+          <p class="long-text">Vorsorgevollmacht: {{ displayValue(patient.powerOfAttorneyNotes, 'Keine Hinweise') }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'leistungen' && !errorMessage">
+      <div class="section-header">
+        <div>
+          <h2>Vereinbarte Leistungen</h2>
+          <p>Diese Leistungen sind fest vereinbart und können von Pflegern nicht bearbeitet werden.</p>
+        </div>
+      </div>
+
+      <div class="card-stack" *ngIf="patient.agreedServices.length; else emptyServices">
+        <article class="info-card" *ngFor="let service of patient.agreedServices">
+          <h3>{{ service.title }}</h3>
+          <p>{{ displayValue(service.notes, 'Keine zusätzlichen Hinweise hinterlegt.') }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'standards' && !errorMessage">
+      <div class="section-header">
+        <div>
+          <h2>Standard-Todos</h2>
+          <p>Diese Aufgaben werden bei neuen Besuchen automatisch übernommen.</p>
+        </div>
+      </div>
+
+      <article class="editor-card editor-card--new">
+        <h3>Neues Standard-Todo</h3>
+        <div class="editor-grid">
+          <label>
+            <span>Titel</span>
+            <input type="text" [(ngModel)]="newDefaultTodoTitle" placeholder="z. B. Blutdruck messen" />
+          </label>
+          <label class="span-2">
+            <span>Hinweise</span>
+            <textarea rows="3" [(ngModel)]="newDefaultTodoNotes" placeholder="Optional"></textarea>
+          </label>
+        </div>
+        <button type="button" class="action-button" (click)="createDefaultTodo()">Standard-Todo anlegen</button>
+      </article>
+
+      <div class="card-stack" *ngIf="patient.defaultTodos.length; else emptyDefaultTodos">
+        <article class="editor-card" *ngFor="let todo of patient.defaultTodos; trackBy: trackDefaultTodo">
+          <div class="editor-card__header">
+            <div>
+              <h3>{{ todo.source === 'admin' ? 'Admin-Vorlage' : 'Pfleger-Vorlage' }}</h3>
+              <small>{{ todo.createdByUser?.name || 'Ohne Zuordnung' }}</small>
+            </div>
+            <span class="status-chip" [class.status-chip--success]="todo.source === 'admin'">{{ todo.source === 'admin' ? 'Admin' : 'Pfleger' }}</span>
+          </div>
+          <div class="editor-grid">
+            <label>
+              <span>Titel</span>
+              <input type="text" [(ngModel)]="todo.title" [disabled]="isDefaultTodoBusy(todo.id)" />
+            </label>
+            <label class="span-2">
+              <span>Hinweise</span>
+              <textarea rows="3" [(ngModel)]="todo.notes" [disabled]="isDefaultTodoBusy(todo.id)"></textarea>
+            </label>
+          </div>
+          <div class="editor-actions">
+            <button type="button" class="action-button action-button--muted" (click)="saveDefaultTodo(todo)" [disabled]="isDefaultTodoBusy(todo.id)">
+              {{ isDefaultTodoBusy(todo.id) ? 'Speichert...' : 'Speichern' }}
+            </button>
+            <button type="button" class="action-button action-button--danger" (click)="deleteDefaultTodo(todo)" [disabled]="isDefaultTodoBusy(todo.id)">
+              {{ isDefaultTodoBusy(todo.id) ? 'Löscht...' : 'Löschen' }}
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <ng-template #emptyDiagnoses><p class="empty-copy">Keine Diagnosen hinterlegt.</p></ng-template>
+    <ng-template #emptyAllergies><p class="empty-copy">Keine Allergien hinterlegt.</p></ng-template>
+    <ng-template #emptyMedication><p class="empty-copy">Kein Medikationsplan hinterlegt.</p></ng-template>
+    <ng-template #emptyServices><p class="empty-copy">Für diesen Pflegekunden wurden noch keine vereinbarten Leistungen hinterlegt.</p></ng-template>
+    <ng-template #emptyDoctors><p class="empty-copy">Keine behandelnden Ärzte hinterlegt.</p></ng-template>
+    <ng-template #emptyContacts><p class="empty-copy">Keine Notfallkontakte hinterlegt.</p></ng-template>
+    <ng-template #noGuardian><p class="empty-copy">Kein gesetzlicher Betreuer hinterlegt.</p></ng-template>
+    <ng-template #emptyDefaultTodos><p class="empty-copy">Noch keine Standard-Todos vorhanden.</p></ng-template>
+    <ng-template #emptyVisits><p class="empty-copy">Es wurden noch keine Besuche dokumentiert.</p></ng-template>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="page-shell caregiver-patient-detail" style="margin-top: 128px;">
+      <section class="detail-hero glass-panel detail-hero--loading detail-skeleton">
+        <div class="detail-skeleton__row detail-skeleton__row--between">
+          <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+          <span class="detail-skeleton__pill detail-skeleton__pill--short detail-skeleton__shine"></span>
+        </div>
+        <div class="detail-skeleton__stack">
+          <span class="detail-skeleton__line detail-skeleton__line--label detail-skeleton__shine"></span>
+          <span class="detail-skeleton__line detail-skeleton__line--title detail-skeleton__shine"></span>
+          <span class="detail-skeleton__line detail-skeleton__shine"></span>
+        </div>
+        <div class="detail-skeleton__grid detail-skeleton__grid--facts">
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+        </div>
+      </section>
+
+      <div class="detail-tabs detail-tabs--loading">
+        <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+        <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+        <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+        <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+      </div>
+
+      <section class="detail-section glass-panel detail-section--loading detail-skeleton">
+        <div class="detail-skeleton__stack">
+          <span class="detail-skeleton__line detail-skeleton__line--section detail-skeleton__shine"></span>
+        </div>
+        <div class="detail-skeleton__grid detail-skeleton__grid--content">
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+</ion-content>

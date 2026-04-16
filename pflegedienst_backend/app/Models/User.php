@@ -100,6 +100,21 @@ class User extends Authenticatable
             ->orderBy('first_name');
     }
 
+    public function createdPatientDefaultTodos()
+    {
+        return $this->hasMany(PatientDefaultTodo::class, 'created_by_user_id');
+    }
+
+    public function createdPatientVisits()
+    {
+        return $this->hasMany(PatientVisit::class, 'created_by_user_id');
+    }
+
+    public function createdPatientVisitTodos()
+    {
+        return $this->hasMany(PatientVisitTodo::class, 'created_by_user_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

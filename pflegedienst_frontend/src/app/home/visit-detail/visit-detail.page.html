@@ -1,0 +1,230 @@
+<ion-content [fullscreen]="true">
+  <div class="detail-action-overlay" *ngIf="isActionLoading">
+    <div class="detail-action-overlay__card glass-panel">
+      <div class="detail-action-overlay__spinner" aria-hidden="true"></div>
+      <strong>{{ actionLoadingMessage || 'Wird verarbeitet...' }}</strong>
+      <p>Bitte kurz warten. Die Daten werden aktualisiert.</p>
+    </div>
+  </div>
+
+  <div class="page-shell visit-detail-page" *ngIf="!isLoading; else loadingState">
+    <article class="detail-message glass-panel" *ngIf="errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <div>
+        <h2>Hinweis</h2>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </article>
+
+    <ng-container *ngIf="!errorMessage && visit">
+      <section class="detail-hero glass-panel">
+        <div class="detail-hero__topbar">
+          <button type="button" class="nav-button" (click)="goBack()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            Zurück zum Pflegekunden
+          </button>
+          <span class="status-chip" [class.status-chip--success]="visit.isReleasedToAdmin" [class.status-chip--warning]="!visit.isReleasedToAdmin">
+            {{ visit.isReleasedToAdmin ? 'Für Admin freigegeben' : 'Noch privat' }}
+          </span>
+        </div>
+
+        <div class="detail-hero__content">
+          <div>
+            <span class="section-kicker">Besuchsdokumentation</span>
+            <h1>{{ formatDate(visit.visitDate) }}</h1>
+            <p>{{ patientName }} | {{ visit.startTime }} - {{ displayValue(visit.endTime, 'offen') }}</p>
+          </div>
+
+          <div class="detail-hero__facts">
+            <div>
+              <span>Todos</span>
+              <strong>{{ visit.todos.length }}</strong>
+            </div>
+            <div>
+              <span>Letzte Änderung</span>
+              <strong>{{ formatDateTime(visit.updatedAt || visit.createdAt) }}</strong>
+            </div>
+            <div>
+              <span>Erstellt von</span>
+              <strong>{{ visit.createdByUser?.name || 'Pfleger' }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-section glass-panel">
+        <div class="section-header">
+          <div>
+            <h2>Besuch bearbeiten</h2>
+            <p>Hier pflegst du Zeiten, Freigabe und Dokumentation für diesen einzelnen Besuch.</p>
+          </div>
+        </div>
+
+        <div class="visit-release-banner" [class.visit-release-banner--released]="visit.isReleasedToAdmin">
+          <div>
+            <strong>{{ visit.isReleasedToAdmin ? 'Admin-Freigabe aktiv' : 'Admin-Freigabe ausstehend' }}</strong>
+            <p *ngIf="visit.isReleasedToAdmin; else unreleasedCopy">
+              Notizen und Todos sind im Admin-Dashboard sichtbar.
+              <span *ngIf="visit.releasedToAdminAt">Freigegeben am {{ formatDateTime(visit.releasedToAdminAt) }}</span>
+              <span *ngIf="visit.releasedToAdminByUser?.name">durch {{ visit.releasedToAdminByUser?.name }}</span>.
+            </p>
+            <ng-template #unreleasedCopy>
+              <p>Admin sieht den Besuch bereits in der Liste, aber noch keine Notizen oder Todos.</p>
+            </ng-template>
+          </div>
+          <button
+            type="button"
+            class="action-button"
+            [class.action-button--muted]="visit.isReleasedToAdmin"
+            [disabled]="busyVisit"
+            (click)="toggleVisitRelease(!visit.isReleasedToAdmin)">
+            {{ busyVisit ? 'Aktualisiert...' : (visit.isReleasedToAdmin ? 'Freigabe zurückziehen' : 'Für Admin freigeben') }}
+          </button>
+        </div>
+
+        <div class="editor-grid editor-grid--visit">
+          <label>
+            <span>Datum</span>
+            <input type="date" [(ngModel)]="visit.visitDate" [disabled]="busyVisit" />
+          </label>
+          <label>
+            <span>Von</span>
+            <input type="time" [(ngModel)]="visit.startTime" [disabled]="busyVisit" />
+          </label>
+          <label>
+            <span>Bis</span>
+            <input type="time" [(ngModel)]="visit.endTime" [disabled]="busyVisit" />
+          </label>
+          <label class="span-3">
+            <span>Notizen</span>
+            <textarea rows="5" [(ngModel)]="visit.notes" placeholder="Besuchsnotizen" [disabled]="busyVisit"></textarea>
+          </label>
+        </div>
+
+        <div class="editor-actions">
+          <button type="button" class="action-button action-button--muted" (click)="saveVisit()" [disabled]="busyVisit">
+            {{ busyVisit ? 'Speichert...' : 'Besuch speichern' }}
+          </button>
+          <button type="button" class="action-button action-button--danger" (click)="deleteVisit()" [disabled]="busyVisit">
+            {{ busyVisit ? 'Löscht...' : 'Besuch löschen' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="detail-section glass-panel">
+        <div class="section-header">
+          <div>
+            <h2>Todo-Liste</h2>
+            <p>Wähle ein Todo aus der kompakten Liste, um die Details zu sehen und zu bearbeiten.</p>
+          </div>
+        </div>
+
+        <div class="visit-todos">
+          <div class="visit-todo-list" *ngIf="visit.todos.length; else noTodosYet">
+            <article
+              class="visit-todo-list__item"
+              *ngFor="let todo of visit.todos; trackBy: trackTodo"
+              [class.visit-todo-list__item--active]="selectedTodoId === todo.id"
+              (click)="selectTodo(todo)">
+              <label class="visit-todo-list__check" (click)="$event.stopPropagation()">
+                <input type="checkbox" [ngModel]="todo.isCompleted" [disabled]="isVisitTodoBusy(todo.id)" (ngModelChange)="toggleVisitTodo(todo, $event)" />
+              </label>
+              <strong [class.is-completed]="todo.isCompleted">{{ todo.title }}</strong>
+            </article>
+          </div>
+
+          <article class="editor-card editor-card--inline">
+            <h4>Todo ergänzen</h4>
+            <div class="editor-grid editor-grid--todo">
+              <label>
+                <span>Titel</span>
+                <input type="text" [(ngModel)]="visitTodoDraft.title" placeholder="Neue Aufgabe" [disabled]="busyVisitDraft" />
+              </label>
+              <label class="span-2">
+                <span>Hinweise</span>
+                <textarea rows="2" [(ngModel)]="visitTodoDraft.notes" placeholder="Optional" [disabled]="busyVisitDraft"></textarea>
+              </label>
+            </div>
+            <button type="button" class="action-button" (click)="addVisitTodo()" [disabled]="busyVisitDraft">
+              {{ busyVisitDraft ? 'Todo wird angelegt...' : 'Todo hinzufügen' }}
+            </button>
+          </article>
+        </div>
+
+        <ng-template #noTodosYet>
+          <div class="empty-hint">Für diesen Besuch gibt es noch keine Todos.</div>
+        </ng-template>
+      </section>
+
+      <ion-modal [isOpen]="!!selectedTodo" (didDismiss)="closeTodoModal()" cssClass="visit-todo-modal">
+        <ng-template>
+          <div class="visit-todo-modal__sheet" *ngIf="selectedTodo as todo">
+            <div class="visit-todo-modal__header">
+              <div>
+                <span class="todo-origin">{{ todo.source === 'default' ? 'Aus Standard-Todo' : 'Manuell hinzugefügt' }}</span>
+                <h3>{{ todo.title }}</h3>
+              </div>
+              <button type="button" class="nav-button" (click)="closeTodoModal()">Schließen</button>
+            </div>
+
+            <div class="visit-todo-modal__body">
+              <label class="visit-todo__check">
+                <input type="checkbox" [ngModel]="todo.isCompleted" [disabled]="isVisitTodoBusy(todo.id)" (ngModelChange)="toggleVisitTodo(todo, $event)" />
+                <span>Erledigt</span>
+              </label>
+
+              <div class="editor-grid editor-grid--todo">
+                <label>
+                  <span>Titel</span>
+                  <input type="text" [(ngModel)]="todo.title" [class.is-completed]="todo.isCompleted" [disabled]="isVisitTodoBusy(todo.id)" />
+                </label>
+                <label class="span-2">
+                  <span>Hinweise</span>
+                  <textarea rows="5" [(ngModel)]="todo.notes" [disabled]="isVisitTodoBusy(todo.id)"></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="editor-actions editor-actions--tight visit-todo-modal__actions">
+              <button type="button" class="action-button action-button--muted" (click)="saveVisitTodo(todo)" [disabled]="isVisitTodoBusy(todo.id)">
+                {{ isVisitTodoBusy(todo.id) ? 'Speichert...' : 'Todo speichern' }}
+              </button>
+              <button type="button" class="action-button action-button--danger" (click)="deleteVisitTodo(todo)" [disabled]="isVisitTodoBusy(todo.id)">
+                {{ isVisitTodoBusy(todo.id) ? 'Löscht...' : 'Todo löschen' }}
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </ion-modal>
+    </ng-container>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="page-shell visit-detail-page">
+      <section class="detail-hero glass-panel detail-skeleton">
+        <div class="detail-skeleton__row detail-skeleton__row--between">
+          <span class="detail-skeleton__pill detail-skeleton__shine"></span>
+          <span class="detail-skeleton__pill detail-skeleton__pill--short detail-skeleton__shine"></span>
+        </div>
+        <div class="detail-skeleton__stack">
+          <span class="detail-skeleton__line detail-skeleton__line--label detail-skeleton__shine"></span>
+          <span class="detail-skeleton__line detail-skeleton__line--title detail-skeleton__shine"></span>
+          <span class="detail-skeleton__line detail-skeleton__shine"></span>
+        </div>
+        <div class="detail-skeleton__grid detail-skeleton__grid--facts">
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__shine"></div>
+        </div>
+      </section>
+      <section class="detail-section glass-panel detail-skeleton">
+        <span class="detail-skeleton__line detail-skeleton__line--section detail-skeleton__shine"></span>
+        <div class="detail-skeleton__grid detail-skeleton__grid--content">
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+          <div class="detail-skeleton__card detail-skeleton__card--tall detail-skeleton__shine"></div>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+</ion-content>

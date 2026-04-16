@@ -1,0 +1,99 @@
+<ion-content [fullscreen]="true">
+  <div class="page-shell patients-overview-page" style="margin-top: 128px;">
+    <section class="patients-overview__hero glass-panel">
+      <div class="patients-overview__hero-top">
+        <button type="button" class="patients-overview__back" (click)="goBack()">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+          Zur Home Page
+        </button>
+        <span class="status-chip" [class.status-chip--warning]="isLoading" [class.status-chip--success]="!isLoading">
+          {{ isLoading ? 'Pflegekunden laden…' : totalCount + ' Pflegekunden' }}
+        </span>
+      </div>
+
+      <div class="patients-overview__hero-content">
+        <div>
+          <span class="section-kicker">Meine Pflegekunden</span>
+          <h1>Alle dir zugewiesenen Pflegekunden in einer Ansicht.</h1>
+          <p>Suche nach Namen oder Patientennummern und filtere deine Zuständigkeiten nach Status.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="patients-overview__filters glass-panel">
+      <div class="patients-overview__search">
+        <ion-icon name="search-outline"></ion-icon>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" placeholder="Nach Name oder Patientennummer suchen..." />
+      </div>
+
+      <select [(ngModel)]="statusFilter" (change)="onStatusChange()">
+        <option value="">Alle Status</option>
+        <option value="active">Aktiv</option>
+        <option value="inactive">Inaktiv</option>
+        <option value="discharged">Entlassen</option>
+        <option value="deceased">Verstorben</option>
+      </select>
+
+      <ion-button (click)="onSearch()" [disabled]="isLoading">
+        <ion-icon slot="start" name="options-outline"></ion-icon>
+        Filtern
+      </ion-button>
+    </section>
+
+    <section class="patients-overview__content" *ngIf="!isLoading; else loadingState">
+      <article class="patients-overview__message glass-panel" *ngIf="errorMessage">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <div>
+          <h2>Hinweis</h2>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </article>
+
+      <div class="patients-overview__list" *ngIf="patients.length; else emptyState">
+        <article class="patient-overview-card glass-panel" *ngFor="let patient of patients; trackBy: trackPatient" (click)="openPatientDetails(patient)">
+          <div class="patient-overview-card__identity">
+            <div class="patient-overview-card__avatar">{{ patientInitials(patient) }}</div>
+            <div>
+              <h3>{{ patientName(patient) }}</h3>
+              <p>{{ patient.patientNumber }}</p>
+            </div>
+          </div>
+
+          <div class="patient-overview-card__chips">
+            <span class="status-chip" [class.status-chip--success]="patient.status === 'active'" [class.status-chip--warning]="patient.status !== 'active'">
+              {{ statusLabel(patient.status) }}
+            </span>
+            <span class="status-chip status-chip--info">{{ careLevelLabel(patient.careLevel) }}</span>
+          </div>
+
+          <div class="patient-overview-card__details">
+            <span>{{ patientAddress(patient) }}</span>
+            <span *ngIf="patient.phone">{{ patient.phone }}</span>
+            <span *ngIf="patient.dateOfBirth">Geb. {{ patient.dateOfBirth }}</span>
+          </div>
+
+          <button type="button" class="patient-overview-card__action" (click)="$event.stopPropagation(); openPatientDetails(patient)">
+            Details ansehen
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <ng-template #loadingState>
+      <section class="patients-overview__list">
+        <article class="patient-overview-card glass-panel patient-overview-card--skeleton" *ngFor="let patient of [1,2,3,4,5,6]"></article>
+      </section>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <article class="patients-overview__message glass-panel">
+        <ion-icon name="people-outline"></ion-icon>
+        <div>
+          <h2>Keine Pflegekunden gefunden</h2>
+          <p>Für den aktuellen Filter gibt es keine dir zugewiesenen Pflegekunden.</p>
+        </div>
+      </article>
+    </ng-template>
+  </div>
+</ion-content>

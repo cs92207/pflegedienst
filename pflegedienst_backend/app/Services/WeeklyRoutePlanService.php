@@ -27,13 +27,33 @@ class WeeklyRoutePlanService
             ->get();
     }
 
+    public function listTemplatesForEmployee(int $employeeId): Collection
+    {
+        return WeeklyRouteTemplate::query()
+            ->with(['employee', 'planner', 'stops'])
+            ->where('employee_id', $employeeId)
+            ->orderBy('weekday')
+            ->orderBy('route_name')
+            ->get();
+    }
+
     public function buildWeekOverview(Carbon $weekStart): array
     {
-        $templates = $this->listTemplates();
+        return $this->buildWeekOverviewFromTemplates($weekStart, $this->listTemplates());
+    }
+
+    public function buildWeekOverviewForEmployee(Carbon $weekStart, int $employeeId): array
+    {
+        return $this->buildWeekOverviewFromTemplates($weekStart, $this->listTemplatesForEmployee($employeeId));
+    }
+
+    private function buildWeekOverviewFromTemplates(Carbon $weekStart, Collection $templates): array
+    {
         $weekEnd = $weekStart->copy()->addDays(6);
 
         $overrides = WeeklyRouteOverride::query()
             ->with(['employee', 'planner', 'stops', 'template'])
+            ->whereIn('weekly_route_template_id', $templates->pluck('id')->all())
             ->whereBetween('route_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
             ->get()
             ->keyBy(fn (WeeklyRouteOverride $override) => $override->route_date->toDateString() . ':' . $override->weekly_route_template_id);

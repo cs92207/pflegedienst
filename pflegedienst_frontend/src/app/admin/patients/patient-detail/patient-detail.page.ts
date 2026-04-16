@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Patient, createEmptyPatient, Medication, TreatingDoctor, EmergencyContact } from '../../../models/patient';
+import { Patient, createEmptyPatient, Medication, TreatingDoctor, EmergencyContact, PatientAgreedService, PatientDefaultTodo } from '../../../models/patient';
 import { User } from '../../../models/user';
 import { AdminAccountService } from '../../../services/admin-account.service';
 import { AdminPatientService } from '../../../services/admin-patient.service';
@@ -18,10 +18,16 @@ export class PatientDetailPage implements OnInit {
   patient: Patient = createEmptyPatient();
   caregivers: User[] = [];
   isLoading = true;
-  activeSection: 'stammdaten' | 'pflege' | 'medikation' | 'aerzte' | 'rechtliches' = 'stammdaten';
+  isSavingAgreedServices = false;
+  activeSection: 'stammdaten' | 'pflege' | 'medikation' | 'aerzte' | 'rechtliches' | 'leistungen' | 'standards' | 'besuche' = 'stammdaten';
 
   newDiagnosis = '';
   newAllergy = '';
+  newServiceTitle = '';
+  newServiceNotes = '';
+  newDefaultTodoTitle = '';
+  newDefaultTodoNotes = '';
+  private agreedServicesSnapshot = '[]';
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +56,7 @@ export class PatientDetailPage implements OnInit {
       ]);
 
       this.patient = patient;
+      this.agreedServicesSnapshot = this.createAgreedServicesSnapshot(patient.agreedServices);
       this.caregivers = [...accounts].sort((left, right) => left.name.localeCompare(right.name, 'de'));
     } catch (error: any) {
       this.popupService.showAlert(error?.error?.message || 'Patient konnte nicht geladen werden.');
@@ -138,6 +145,63 @@ export class PatientDetailPage implements OnInit {
     this.patient.legalGuardian = null;
   }
 
+  async addAgreedService() {
+    if (!this.newServiceTitle.trim()) {
+      return;
+    }
+
+    this.patient.agreedServices = [
+      ...this.patient.agreedServices,
+      {
+        title: this.newServiceTitle.trim(),
+        notes: this.newServiceNotes.trim(),
+      }
+    ];
+
+    this.newServiceTitle = '';
+    this.newServiceNotes = '';
+
+    await this.persistAgreedServices(true);
+  }
+
+  async removeAgreedService(service: PatientAgreedService) {
+    this.patient.agreedServices = this.patient.agreedServices.filter((item) => item !== service);
+
+    await this.persistAgreedServices(true);
+  }
+
+  async onAgreedServiceBlur() {
+    await this.persistAgreedServices();
+  }
+
+  addDefaultTodo() {
+    if (!this.newDefaultTodoTitle.trim()) {
+      return;
+    }
+
+    const nextSortOrder = this.patient.defaultTodos.reduce((max, todo) => Math.max(max, todo.sortOrder), 0) + 1;
+    this.patient.defaultTodos = [
+      ...this.patient.defaultTodos,
+      {
+        id: 0,
+        title: this.newDefaultTodoTitle.trim(),
+        notes: this.newDefaultTodoNotes.trim(),
+        sortOrder: nextSortOrder,
+        source: 'admin',
+        createdByUser: null,
+        createdAt: '',
+        updatedAt: '',
+      }
+    ];
+
+    this.newDefaultTodoTitle = '';
+    this.newDefaultTodoNotes = '';
+  }
+
+  removeDefaultTodo(todo: PatientDefaultTodo) {
+    this.patient.defaultTodos = this.patient.defaultTodos.filter((item) => item !== todo);
+  }
+
   isResponsibleEmployee(userId: number): boolean {
     return this.patient.responsibleEmployeeIds.includes(userId);
   }
@@ -161,5 +225,83 @@ export class PatientDetailPage implements OnInit {
       active: 'Aktiv', inactive: 'Inaktiv', deceased: 'Verstorben', discharged: 'Entlassen',
     };
     return labels[status] || status;
+  }
+
+  get sortedVisits() {
+    return [...this.patient.visits].sort((left, right) => {
+      const leftKey = `${left.visitDate} ${left.startTime}`;
+      const rightKey = `${right.visitDate} ${right.startTime}`;
+      return rightKey.localeCompare(leftKey);
+    });
+  }
+
+  formatDate(value: string): string {
+    if (!value) {
+      return 'Nicht hinterlegt';
+    }
+
+    return new Intl.DateTimeFormat('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(value));
+  }
+
+  formatDateTime(value: string): string {
+    if (!value) {
+      return 'Noch nicht gespeichert';
+    }
+
+    return new Intl.DateTimeFormat('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(value));
+  }
+
+  private async persistAgreedServices(showSuccess = false) {
+    if (!this.patient.id || this.isSavingAgreedServices) {
+      return;
+    }
+
+    const normalizedServices = this.normalizeAgreedServices(this.patient.agreedServices);
+    const nextSnapshot = this.createAgreedServicesSnapshot(normalizedServices);
+
+    this.patient.agreedServices = normalizedServices;
+
+    if (nextSnapshot === this.agreedServicesSnapshot) {
+      return;
+    }
+
+    this.isSavingAgreedServices = true;
+
+    try {
+      const response = await this.patientService.updateAgreedServices(this.patient.id, normalizedServices);
+      this.patient.agreedServices = response.agreedServices;
+      this.agreedServicesSnapshot = this.createAgreedServicesSnapshot(response.agreedServices);
+
+      if (showSuccess) {
+        this.popupService.showSuccess(response.message);
+      }
+    } catch (error: any) {
+      this.popupService.showAlert(error?.error?.message || 'Leistungen konnten nicht gespeichert werden.');
+    } finally {
+      this.isSavingAgreedServices = false;
+    }
+  }
+
+  private normalizeAgreedServices(services: PatientAgreedService[]): PatientAgreedService[] {
+    return services
+      .map((service) => ({
+        title: service.title.trim(),
+        notes: service.notes.trim(),
+      }))
+      .filter((service) => service.title.length > 0);
+  }
+
+  private createAgreedServicesSnapshot(services: PatientAgreedService[]): string {
+    return JSON.stringify(this.normalizeAgreedServices(services));
   }
 }

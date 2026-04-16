@@ -29,6 +29,51 @@ export interface ResponsibleEmployee {
   email: string;
 }
 
+export interface PatientAgreedService {
+  title: string;
+  notes: string;
+}
+
+export interface PatientDefaultTodo {
+  id: number;
+  title: string;
+  notes: string;
+  sortOrder: number;
+  source: 'admin' | 'caregiver';
+  createdByUser: ResponsibleEmployee | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PatientVisitTodo {
+  id: number;
+  patientDefaultTodoId: number | null;
+  title: string;
+  notes: string;
+  isCompleted: boolean;
+  completedAt: string;
+  sortOrder: number;
+  source: 'default' | 'manual';
+  createdByUser: ResponsibleEmployee | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PatientVisit {
+  id: number;
+  visitDate: string;
+  startTime: string;
+  endTime: string;
+  notes: string;
+  isReleasedToAdmin: boolean;
+  releasedToAdminAt: string;
+  releasedToAdminByUser: ResponsibleEmployee | null;
+  createdByUser: ResponsibleEmployee | null;
+  todos: PatientVisitTodo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PatientListItem {
   id: number;
   patientNumber: string;
@@ -85,6 +130,7 @@ export interface Patient {
   mobility: string;
   nutrition: string;
   communicationAbility: string;
+  agreedServices: PatientAgreedService[];
 
   // Ärzte & Kontakte
   treatingDoctors: TreatingDoctor[];
@@ -99,6 +145,8 @@ export interface Patient {
   hasDnrOrder: boolean;
   responsibleEmployees: ResponsibleEmployee[];
   responsibleEmployeeIds: number[];
+  defaultTodos: PatientDefaultTodo[];
+  visits: PatientVisit[];
 
   createdAt: string;
   updatedAt: string;
@@ -133,6 +181,7 @@ export function createEmptyPatient(): Patient {
     mobility: '',
     nutrition: '',
     communicationAbility: '',
+    agreedServices: [],
     treatingDoctors: [],
     emergencyContacts: [],
     legalGuardian: null,
@@ -143,6 +192,8 @@ export function createEmptyPatient(): Patient {
     hasDnrOrder: false,
     responsibleEmployees: [],
     responsibleEmployeeIds: [],
+    defaultTodos: [],
+    visits: [],
     createdAt: '',
     updatedAt: '',
   };

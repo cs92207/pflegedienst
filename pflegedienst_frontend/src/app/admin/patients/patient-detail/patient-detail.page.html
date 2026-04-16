@@ -27,6 +27,9 @@
       <button [class.active]="activeSection === 'medikation'" (click)="activeSection = 'medikation'">Medikation</button>
       <button [class.active]="activeSection === 'aerzte'" (click)="activeSection = 'aerzte'">Ärzte & Kontakte</button>
       <button [class.active]="activeSection === 'rechtliches'" (click)="activeSection = 'rechtliches'">Rechtliches</button>
+      <button [class.active]="activeSection === 'leistungen'" (click)="activeSection = 'leistungen'">Leistungen</button>
+      <button [class.active]="activeSection === 'standards'" (click)="activeSection = 'standards'">Standard-Todos</button>
+      <button [class.active]="activeSection === 'besuche'" (click)="activeSection = 'besuche'">Besuche</button>
     </div>
 
     <!-- ═══════════════ STAMMDATEN ═══════════════ -->
@@ -387,6 +390,157 @@
           <input type="checkbox" [(ngModel)]="patient.hasDnrOrder" />
           <span>DNR-Verfügung (Keine Reanimation)</span>
         </label>
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'standards'">
+      <div class="section-header">
+        <h2>Standard-Todos für Besuche</h2>
+      </div>
+
+      <div class="default-todo-create">
+        <div class="form-grid form-grid--2">
+          <label>
+            <span>Titel</span>
+            <input type="text" [(ngModel)]="newDefaultTodoTitle" placeholder="z. B. Blutdruck messen" />
+          </label>
+          <label>
+            <span>Hinweise</span>
+            <input type="text" [(ngModel)]="newDefaultTodoNotes" placeholder="Optional" />
+          </label>
+        </div>
+        <ion-button fill="outline" size="small" (click)="addDefaultTodo()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Standard-Todo hinzufügen
+        </ion-button>
+      </div>
+
+      <div class="default-todo-card" *ngFor="let todo of patient.defaultTodos">
+        <div class="default-todo-card__header">
+          <span class="status-chip" [class.status-chip--success]="todo.source === 'admin'" [class.status-chip--warning]="todo.source !== 'admin'">
+            {{ todo.source === 'admin' ? 'Admin' : 'Pfleger' }}
+          </span>
+        </div>
+        <div class="form-grid form-grid--2">
+          <label>
+            <span>Titel</span>
+            <input type="text" [(ngModel)]="todo.title" />
+          </label>
+          <label>
+            <span>Hinweise</span>
+            <input type="text" [(ngModel)]="todo.notes" placeholder="Optional" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="removeDefaultTodo(todo)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Entfernen
+        </ion-button>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.defaultTodos.length === 0">
+        Für diesen Pflegekunden sind noch keine Standard-Todos hinterlegt.
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'leistungen'">
+      <div class="section-header">
+        <div>
+          <h2>Vereinbarte Leistungen</h2>
+          <p>Diese Leistungen sind fest mit dem Pflegekunden vereinbart und werden Pflegern nur lesend angezeigt.</p>
+        </div>
+      </div>
+
+      <div class="service-create">
+        <div class="form-grid form-grid--2">
+          <label>
+            <span>Leistung</span>
+            <input type="text" [(ngModel)]="newServiceTitle" placeholder="z. B. Körperpflege morgens" (keyup.enter)="addAgreedService()" />
+          </label>
+          <label>
+            <span>Hinweise</span>
+            <input type="text" [(ngModel)]="newServiceNotes" placeholder="Optional" (keyup.enter)="addAgreedService()" />
+          </label>
+        </div>
+        <ion-button fill="outline" size="small" (click)="addAgreedService()" [disabled]="isSavingAgreedServices || !newServiceTitle.trim()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Leistung hinzufügen
+        </ion-button>
+        <p class="section-subtle" *ngIf="isSavingAgreedServices">Leistungen werden gespeichert...</p>
+      </div>
+
+      <div class="service-card" *ngFor="let service of patient.agreedServices">
+        <div class="form-grid form-grid--2">
+          <label>
+            <span>Leistung</span>
+            <input type="text" [(ngModel)]="service.title" (blur)="onAgreedServiceBlur()" />
+          </label>
+          <label>
+            <span>Hinweise</span>
+            <input type="text" [(ngModel)]="service.notes" placeholder="Optional" (blur)="onAgreedServiceBlur()" />
+          </label>
+        </div>
+        <ion-button fill="clear" color="danger" size="small" (click)="removeAgreedService(service)" [disabled]="isSavingAgreedServices">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Entfernen
+        </ion-button>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.agreedServices.length === 0">
+        Für diesen Pflegekunden wurden noch keine vereinbarten Leistungen hinterlegt.
+      </div>
+    </section>
+
+    <section class="detail-section glass-panel" *ngIf="activeSection === 'besuche'">
+      <div class="section-header">
+        <div>
+          <h2>Besuche und Freigaben</h2>
+          <p>Admin sieht jeden angelegten Besuch sofort. Todos und Notizen bleiben bis zur Freigabe verborgen.</p>
+        </div>
+      </div>
+
+      <div class="visit-review-card" *ngFor="let visit of sortedVisits">
+        <div class="visit-review-card__header">
+          <div>
+            <h3>{{ formatDate(visit.visitDate) }}</h3>
+            <p>{{ visit.startTime }} - {{ visit.endTime || 'offen' }} | {{ visit.createdByUser?.name || 'Pfleger' }}</p>
+          </div>
+          <span class="status-chip" [class.status-chip--success]="visit.isReleasedToAdmin" [class.status-chip--warning]="!visit.isReleasedToAdmin">
+            {{ visit.isReleasedToAdmin ? 'Freigegeben' : 'Nicht freigegeben' }}
+          </span>
+        </div>
+
+        <div class="visit-review-meta">
+          <span>Erstellt: {{ formatDateTime(visit.createdAt) }}</span>
+          <span *ngIf="visit.isReleasedToAdmin && visit.releasedToAdminAt">Freigegeben: {{ formatDateTime(visit.releasedToAdminAt) }}</span>
+          <span *ngIf="visit.isReleasedToAdmin && visit.releasedToAdminByUser?.name">Von: {{ visit.releasedToAdminByUser?.name }}</span>
+        </div>
+
+        <div class="visit-review-sensitive" *ngIf="visit.isReleasedToAdmin; else hiddenVisitContent">
+          <h4>Notizen</h4>
+          <p>{{ visit.notes || 'Keine Notizen hinterlegt.' }}</p>
+
+          <h4>Todos</h4>
+          <div class="visit-review-todos" *ngIf="visit.todos.length; else noVisitTodos">
+            <div class="visit-review-todo" *ngFor="let todo of visit.todos">
+              <strong>{{ todo.title }}</strong>
+              <span>{{ todo.isCompleted ? 'Erledigt' : 'Offen' }}</span>
+              <p>{{ todo.notes || 'Keine Hinweise' }}</p>
+            </div>
+          </div>
+          <ng-template #noVisitTodos>
+            <div class="empty-hint">Für diesen Besuch wurden keine Todos gespeichert.</div>
+          </ng-template>
+        </div>
+
+        <ng-template #hiddenVisitContent>
+          <div class="empty-hint">
+            Dieser Besuch ist angelegt, aber Notizen und Todos sind noch nicht manuell für das Admin-Dashboard freigegeben.
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="empty-hint" *ngIf="patient.visits.length === 0">
+        Für diesen Pflegekunden wurden noch keine Besuche dokumentiert.
       </div>
     </section>
 

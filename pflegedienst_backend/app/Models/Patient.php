@@ -57,6 +57,7 @@ class Patient extends Model
         'mobility',
         'nutrition',
         'communication_ability',
+        'agreed_services',
 
         // Ärzte & Kontaktpersonen (verschlüsselt)
         'treating_doctors',
@@ -103,6 +104,7 @@ class Patient extends Model
         'diagnoses'          => 'encrypted:array',
         'allergies'          => 'encrypted:array',
         'medications'        => 'encrypted:array',
+        'agreed_services'    => 'encrypted:array',
         'treating_doctors'   => 'encrypted:array',
         'emergency_contacts' => 'encrypted:array',
         'legal_guardian'     => 'encrypted:array',
@@ -167,5 +169,20 @@ class Patient extends Model
         return $this->belongsToMany(User::class, 'patient_responsible_users')
             ->withTimestamps()
             ->orderBy('name');
+    }
+
+    public function defaultTodos()
+    {
+        return $this->hasMany(PatientDefaultTodo::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function visits()
+    {
+        return $this->hasMany(PatientVisit::class)
+            ->orderByDesc('visit_date')
+            ->orderByDesc('start_time')
+            ->orderByDesc('id');
     }
 }

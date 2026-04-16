@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PatientDefaultTodo;
 use App\Models\Patient;
+use App\Models\PatientVisit;
+use App\Models\PatientVisitTodo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class PatientController extends Controller
@@ -44,7 +48,14 @@ class PatientController extends Controller
      */
     public function show(Patient $patient): JsonResponse
     {
-        $patient->loadMissing('responsibleUsers:id,name,email');
+        $patient->loadMissing([
+            'responsibleUsers:id,name,email',
+            'defaultTodos.createdByUser:id,name,email',
+            'visits.createdByUser:id,name,email',
+            'visits.releasedToAdminByUser:id,name,email',
+            'visits.todos.createdByUser:id,name,email',
+            'visits.todos.defaultTodo:id,patient_id',
+        ]);
 
         return response()->json([
             'success' => 1,
@@ -59,9 +70,21 @@ class PatientController extends Controller
     {
         $validated = $this->validatePatient($request);
 
-        $patient = Patient::create($this->extractPatientAttributes($validated));
-        $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
-        $patient->load('responsibleUsers:id,name,email');
+        $patient = DB::transaction(function () use ($validated, $request) {
+            $patient = Patient::create($this->extractPatientAttributes($validated));
+            $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
+            $this->syncDefaultTodos($patient, $validated['default_todos'] ?? [], $request->user()->id, 'admin');
+            $patient->load([
+                'responsibleUsers:id,name,email',
+                'defaultTodos.createdByUser:id,name,email',
+                'visits.createdByUser:id,name,email',
+                'visits.releasedToAdminByUser:id,name,email',
+                'visits.todos.createdByUser:id,name,email',
+                'visits.todos.defaultTodo:id,patient_id',
+            ]);
+
+            return $patient;
+        });
 
         return response()->json([
             'success' => 1,
@@ -77,15 +100,47 @@ class PatientController extends Controller
     {
         $validated = $this->validatePatient($request, $patient);
 
-        $patient->fill($this->extractPatientAttributes($validated));
-        $patient->save();
-        $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
-        $patient->load('responsibleUsers:id,name,email');
+        DB::transaction(function () use ($patient, $validated, $request) {
+            $patient->fill($this->extractPatientAttributes($validated));
+            $patient->save();
+            $patient->responsibleUsers()->sync($validated['responsible_employee_ids'] ?? []);
+            $this->syncDefaultTodos($patient, $validated['default_todos'] ?? [], $request->user()->id, 'admin');
+        });
+
+        $patient->load([
+            'responsibleUsers:id,name,email',
+            'defaultTodos.createdByUser:id,name,email',
+            'visits.createdByUser:id,name,email',
+            'visits.releasedToAdminByUser:id,name,email',
+            'visits.todos.createdByUser:id,name,email',
+            'visits.todos.defaultTodo:id,patient_id',
+        ]);
 
         return response()->json([
             'success' => 1,
             'message' => 'Patient wurde aktualisiert.',
             'patient' => $this->serializeFull($patient),
+        ]);
+    }
+
+    /**
+     * Vereinbarte Leistungen separat aktualisieren.
+     */
+    public function updateAgreedServices(Request $request, Patient $patient): JsonResponse
+    {
+        $validated = $request->validate([
+            'agreed_services' => ['nullable', 'array'],
+            'agreed_services.*.title' => ['required_with:agreed_services', 'string', 'max:255'],
+            'agreed_services.*.notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $patient->agreed_services = $validated['agreed_services'] ?? null;
+        $patient->save();
+
+        return response()->json([
+            'success' => 1,
+            'message' => 'Leistungen wurden gespeichert.',
+            'agreed_services' => $patient->agreed_services ?? [],
         ]);
     }
 
@@ -147,6 +202,9 @@ class PatientController extends Controller
             'mobility'                => ['nullable', 'string', 'max:255'],
             'nutrition'               => ['nullable', 'string', 'max:255'],
             'communication_ability'   => ['nullable', 'string', 'max:255'],
+            'agreed_services'         => ['nullable', 'array'],
+            'agreed_services.*.title' => ['required_with:agreed_services', 'string', 'max:255'],
+            'agreed_services.*.notes' => ['nullable', 'string', 'max:1000'],
 
             // Ärzte
             'treating_doctors'             => ['nullable', 'array'],
@@ -174,14 +232,63 @@ class PatientController extends Controller
             // Zuständige Pfleger
             'responsible_employee_ids'   => ['sometimes', 'array'],
             'responsible_employee_ids.*' => ['integer', 'distinct', 'exists:users,id'],
+
+            // Standard-Todos
+            'default_todos' => ['sometimes', 'array'],
+            'default_todos.*.id' => ['nullable', 'integer'],
+            'default_todos.*.title' => ['required_with:default_todos', 'string', 'max:500'],
+            'default_todos.*.notes' => ['nullable', 'string', 'max:2000'],
+            'default_todos.*.sort_order' => ['nullable', 'integer', 'min:0'],
+            'default_todos.*.source' => ['nullable', Rule::in(['admin', 'caregiver'])],
         ]);
     }
 
     private function extractPatientAttributes(array $validated): array
     {
         unset($validated['responsible_employee_ids']);
+        unset($validated['default_todos']);
 
         return $validated;
+    }
+
+    private function syncDefaultTodos(Patient $patient, array $items, int $userId, string $fallbackSource): void
+    {
+        $existingIds = $patient->defaultTodos()->pluck('id')->all();
+        $keptIds = [];
+
+        foreach (array_values($items) as $index => $item) {
+            $attributes = [
+                'title' => $item['title'],
+                'notes' => $item['notes'] ?? null,
+                'sort_order' => $item['sort_order'] ?? $index,
+                'source' => $item['source'] ?? $fallbackSource,
+            ];
+
+            $todoId = isset($item['id']) ? (int) $item['id'] : null;
+
+            if ($todoId) {
+                $todo = $patient->defaultTodos()->whereKey($todoId)->first();
+                if (!$todo) {
+                    continue;
+                }
+
+                $todo->fill($attributes);
+                $todo->save();
+                $keptIds[] = $todo->id;
+                continue;
+            }
+
+            $todo = $patient->defaultTodos()->create($attributes + [
+                'created_by_user_id' => $userId,
+            ]);
+
+            $keptIds[] = $todo->id;
+        }
+
+        $deleteIds = array_diff($existingIds, $keptIds);
+        if ($deleteIds) {
+            $patient->defaultTodos()->whereIn('id', $deleteIds)->delete();
+        }
     }
 
     // ── Serialisierung ──────────────────────────────────
@@ -253,6 +360,7 @@ class PatientController extends Controller
             'mobility'              => $p->mobility,
             'nutrition'             => $p->nutrition,
             'communication_ability' => $p->communication_ability,
+            'agreed_services'       => $p->agreed_services ?? [],
 
             // Ärzte & Kontakte
             'treating_doctors'   => $p->treating_doctors ?? [],
@@ -266,9 +374,62 @@ class PatientController extends Controller
             'power_of_attorney_notes' => $p->power_of_attorney_notes,
             'has_dnr_order'           => $p->has_dnr_order,
             'responsible_users'       => $p->responsibleUsers->map(fn ($user) => $this->serializeResponsibleUser($user))->values(),
+            'default_todos'           => $p->defaultTodos->map(fn (PatientDefaultTodo $todo) => $this->serializeDefaultTodo($todo))->values(),
+            'visits'                  => $p->visits->map(fn (PatientVisit $visit) => $this->serializeVisit($visit, (bool) $visit->released_to_admin_at))->values(),
 
             'created_at' => $p->created_at?->toISOString(),
             'updated_at' => $p->updated_at?->toISOString(),
+        ];
+    }
+
+    private function serializeDefaultTodo(PatientDefaultTodo $todo): array
+    {
+        return [
+            'id' => $todo->id,
+            'title' => $todo->title,
+            'notes' => $todo->notes,
+            'sort_order' => $todo->sort_order,
+            'source' => $todo->source,
+            'created_by_user' => $todo->createdByUser ? $this->serializeResponsibleUser($todo->createdByUser) : null,
+            'created_at' => $todo->created_at?->toISOString(),
+            'updated_at' => $todo->updated_at?->toISOString(),
+        ];
+    }
+
+    private function serializeVisit(PatientVisit $visit, bool $includeSensitiveContent): array
+    {
+        return [
+            'id' => $visit->id,
+            'visit_date' => $visit->visit_date?->toDateString(),
+            'start_time' => $visit->start_time,
+            'end_time' => $visit->end_time,
+            'notes' => $includeSensitiveContent ? $visit->notes : null,
+            'is_released_to_admin' => (bool) $visit->released_to_admin_at,
+            'released_to_admin_at' => $visit->released_to_admin_at?->toISOString(),
+            'released_to_admin_by_user' => $visit->releasedToAdminByUser ? $this->serializeResponsibleUser($visit->releasedToAdminByUser) : null,
+            'created_by_user' => $visit->createdByUser ? $this->serializeResponsibleUser($visit->createdByUser) : null,
+            'todos' => $includeSensitiveContent
+                ? $visit->todos->map(fn (PatientVisitTodo $todo) => $this->serializeVisitTodo($todo))->values()
+                : [],
+            'created_at' => $visit->created_at?->toISOString(),
+            'updated_at' => $visit->updated_at?->toISOString(),
+        ];
+    }
+
+    private function serializeVisitTodo(PatientVisitTodo $todo): array
+    {
+        return [
+            'id' => $todo->id,
+            'patient_default_todo_id' => $todo->patient_default_todo_id,
+            'title' => $todo->title,
+            'notes' => $todo->notes,
+            'is_completed' => $todo->is_completed,
+            'completed_at' => $todo->completed_at?->toISOString(),
+            'sort_order' => $todo->sort_order,
+            'source' => $todo->source,
+            'created_by_user' => $todo->createdByUser ? $this->serializeResponsibleUser($todo->createdByUser) : null,
+            'created_at' => $todo->created_at?->toISOString(),
+            'updated_at' => $todo->updated_at?->toISOString(),
         ];
     }
 

@@ -6,59 +6,48 @@ Pflegerouten ✔️
   - Pflegekunden zur Route hinzufügen ✔️ 
   - Route berechnen und für Pfelger speichern ✔️
 
-
 Pflegerouten langfristig speichern ✔️
   - "Schichtplan" (Tagesrouten für alle Mitarbeiter im Schichtplan speichern) ✔️
 
 
-Pflegekunden Pflegern zugeweisen 
-  - Pflegekunden können einem oder mehreren Mitarbeitern zugewiesen werden
-  - Später sehen Pfleger nur ihre zugewiesenen Kunden im Dashboard
-  - Bei neuer Route für Mitarbeiter mit Kunden, die ihm nicht zugewiesen sind fragen, ob dies automatisch passieren soll
+Pflegekunden Pflegern zugeweisen  ✔️
+  - Pflegekunden können einem oder mehreren Mitarbeitern zugewiesen werden ✔️
+  - Später sehen Pfleger nur ihre zugewiesenen Kunden im Dashboard ✔️
+  - Bei neuer Route für Mitarbeiter mit Kunden, die ihm nicht zugewiesen sind fragen, ob dies automatisch passieren soll ✔️
 
 
 
 
-Pfleger Dashboard
-  - Pfleger bekommt seine aktuelle Route angezeigt
-  - Pfleger sieht eine Liste von allen ihm zugewiesenen Pflegekunden
+Pfleger Dashboard ✔️
+  - Pfleger bekommt seine aktuelle Route angezeigt ✔️
+  - Pfleger sieht eine Liste von allen ihm zugewiesenen Pflegekunden ✔️
 
-Routen:
---------
-Bitte mache als nächstes das Pfleger Dashboard in der Home Page. Bitte beachte das grundsätzlich jeder User ein Pfleger ist,
-egal ob Admin oder Benutzer etc. 
-Das Dashboard soll extrem schick designed sein und man soll seine aktuellen Routen sehen. 
-Also zuerst die Tagesroute(n) und dann kann man mit einem Pfeil durch die Tage switchen und immer seine Routen an 
-den jeweiligen Tagen sehen. Wenn man bei der card für die Routen dann auf Alle ansehen klickt, kommt man auf eine Unterseite,
-wo man die Routen dann in einer Wochen ansicht sieht und durch die Wochen durchklicken kann und immer seine zugewiesenen Routen sieht.
-Bei jeder Route soll es zudem die Möglichkeit geben drauf zu klicken / Details zu sehen. Wenn man das macht, passiert das erstmal
-noch nicht. Die Routen Details sollen später implementiert werden.
 
-Pflegekunden:
----------------
-Zudem soll man im Dashboard ein paar seiner zugewiesenen Pflegekunden sehen. (Neuste).
-Hier soll es dann eine weitere Card geben. Auch hier kann man dann auf alle anzeigen klicken. Dann sieht man alle seine zugewiesenen
-Kunden. Und kann suchen / filtern.
-Bei jedem Kunden kann man ebenfalls klicken um später details zu sehen. Bitte implementiere auch das noch nicht. Die Pflegekunden
-Details sollen später implementiert werden.
 
 
 Routen Details
 
 Pfleger Pflegekunden Dashboard 
-  - Pfleger bekommt ein Dashboard mit Kundendetails von ihm verwaltete Kunden
-  - Hier hat er zudem eine Todo-Liste, was gemacht werden muss
-  - Er kann bei jedem Besuch auf Besuch erstellen klicken. 
-  - Jeder Besuch bekommt automatisch die Standart Todos des Kundens aber es können auch manuell für bestimmte Besuche extra Todos hinzugefügt werden
-  - Für jeden Besuch kann man dann die Todos automatisch abhacken
-  - Und der Pfleger kann sich hier direkt für jeden Besuch Notizen machen (für spätere Dokumentation)
-  - Im Admin Dashboard kann man die Besuche auch angelegt sehen sieht aber nur nach manueller Freigabe auch Todos und Notizen
+  - Pfleger bekommt ein Dashboard mit Kundendetails von ihm verwaltete Kunden ✔️
+  - Hier hat er zudem eine Todo-Liste, was gemacht werden muss ✔️
+  - Er kann bei jedem Besuch auf Besuch erstellen klicken. ✔️
+  - Jeder Besuch bekommt automatisch die Standart Todos des Kundens aber es können auch manuell für bestimmte Besuche extra Todos hinzugefügt werden ✔️
+  - Für jeden Besuch kann man dann die Todos automatisch abhacken ✔️
+  - Und der Pfleger kann sich hier direkt für jeden Besuch Notizen machen (für spätere Dokumentation) ✔️
+  - Im Admin Dashboard kann man die Besuche auch angelegt sehen sieht aber nur nach manueller Freigabe auch Todos und Notizen ✔️
 
 Zugesicherte Leistungen für Kunde verwalten
-  - Im Admin Panel kann man für jeden Kunden die vereinbarten Leistungen hinterlegen
-  - Im Admin Panel können zudem Standart-Todos für einen Kunden eingetragen werden
-  - Pfleger sehen für ihren Kunden alle Leistungen die zu erbringen sind
-  - Pfleger sehen alle Standart-Todos, die aus dem Admin Panel kommen (können aber eigene hinzufügen, Standart-Todos jedoch nur nach Freigabe löschen oder updaten)
+  - Im Admin Panel kann man für jeden Kunden die vereinbarten Leistungen hinterlegen ✔️
+  - Im Admin Panel können zudem Standart-Todos für einen Kunden eingetragen werden ✔️
+  - Pfleger sehen für ihren Kunden alle Leistungen die zu erbringen sind ✔️
+  - Pfleger sehen alle Standart-Todos, die aus dem Admin Panel kommen (können aber eigene hinzufügen, Standart-Todos jedoch nur nach Freigabe löschen oder updaten) ✔️
+
+
+Routen Details
+- Wenn Pfleger auf Route in der Home Page klickt, Details Seite öffnen
+- Zeitplan (Zeitstrahl) mit allen Stopps und Uhrzeiten inklusive Start und Stopp
+- Patienten werden bei den Stopps angezeigt, bei klickt, kommt man auf Patient Details Seite
+
 
 Dokumente für Kunden verwalten
 

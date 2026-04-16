@@ -1,5 +1,244 @@
-
-
 <ion-content [fullscreen]="true">
-	
+	<div style="margin-top: 128px;" class="page-shell home-page">
+		<ng-container *ngIf="!isLoading; else loadingState">
+			<section class="home-hero glass-panel">
+				<div class="home-hero__copy">
+					<span class="section-kicker">Pfleger Dashboard</span>
+					<h1>{{ greeting }}, {{ firstName }}.</h1>
+					<p>
+						Deine Startseite zeigt dir direkt die relevanten Tagestouren. Wechsle durch die Tage,
+						behalte deine Stopps im Blick und springe bei Bedarf in die komplette Wochenansicht.
+					</p>
+
+					<div class="home-date-pill">
+						<ion-icon name="calendar-clear-outline"></ion-icon>
+						<span>{{ week?.label || 'Aktuelle Woche' }}</span>
+					</div>
+				</div>
+			</section>
+
+			<div class="home-content-grid">
+				<section class="route-focus glass-panel">
+					<div class="route-focus__header">
+						<div>
+							<span class="section-kicker section-kicker--soft">Tagesrouten</span>
+							<h2>{{ selectedDayHeadline }}</h2>
+							<p>{{ selectedDaySubline }}</p>
+						</div>
+
+						<div class="route-focus__actions">
+							<div class="day-switcher">
+								<button type="button" class="day-switcher__button" (click)="navigateDay(-1)" aria-label="Vorheriger Tag">
+									<ion-icon name="chevron-back-outline"></ion-icon>
+								</button>
+								<button type="button" class="day-switcher__button" (click)="navigateDay(1)" aria-label="Nächster Tag">
+									<ion-icon name="chevron-forward-outline"></ion-icon>
+								</button>
+							</div>
+
+							<button type="button" class="link-button" (click)="openRoutesOverview()">
+								Alle ansehen
+								<ion-icon name="open-outline"></ion-icon>
+							</button>
+						</div>
+					</div>
+
+					<div class="day-rail" *ngIf="weekDays.length">
+						<button
+							type="button"
+							class="day-pill"
+							*ngFor="let day of weekDays; trackBy: trackDay"
+							[class.day-pill--active]="isSelectedDay(day.date)"
+							[class.day-pill--today]="isToday(day.date)"
+							(click)="selectedDate = day.date"
+						>
+							<strong>{{ formatDateLabel(day.date, { weekday: 'short' }) }}</strong>
+							<span>{{ formatDateLabel(day.date, { day: '2-digit', month: '2-digit' }) }}</span>
+							<small>{{ day.routes.length }} {{ day.routes.length === 1 ? 'Route' : 'Routen' }}</small>
+						</button>
+					</div>
+
+					<div class="route-list" *ngIf="selectedRoutes.length; else emptyRoutesState">
+						<article class="route-card" *ngFor="let route of selectedRoutes; trackBy: trackRoute">
+							<div class="route-card__header">
+								<div>
+									<div class="route-card__eyebrow">
+										<span>{{ compactTime(route.shiftStartTime) }} Uhr Start</span>
+										<span class="status-chip status-chip--warning" *ngIf="route.hasOverride">Geändert</span>
+									</div>
+									<h3>{{ route.routeName || 'Route ohne Namen' }}</h3>
+								</div>
+
+								<button type="button" class="route-card__details" (click)="showRouteDetailsUnavailable(route)">
+									Details ansehen
+									<ion-icon name="chevron-forward-outline"></ion-icon>
+								</button>
+							</div>
+
+							<div class="route-card__metrics">
+								<div>
+									<span>Stopps</span>
+									<strong>{{ route.stops.length }}</strong>
+								</div>
+								<div>
+									<span>Dauer</span>
+									<strong>{{ routeDurationLabel(route) }}</strong>
+								</div>
+								<div>
+									<span>Distanz</span>
+									<strong>{{ distanceLabel(route) }}</strong>
+								</div>
+								<div>
+									<span>Pflegezeit</span>
+									<strong>{{ route.totalServiceMinutes }} Min</strong>
+								</div>
+							</div>
+
+							<div class="route-card__stops">
+								<div class="route-stop" *ngFor="let stop of route.stops.slice(0, 4)">
+									<span class="route-stop__index">{{ stop.stopOrder }}</span>
+									<div>
+										<strong>{{ stop.patientName }}</strong>
+										<p>{{ stop.addressLine }}</p>
+									</div>
+									<small>{{ compactTime(stop.arrivalTime || stop.scheduledFor) }}</small>
+								</div>
+							</div>
+
+							<div class="route-card__footer" *ngIf="route.stops.length > 4">
+								<ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+								<span>Noch {{ route.stops.length - 4 }} weitere Stopps in dieser Route</span>
+							</div>
+						</article>
+					</div>
+				</section>
+
+				<section class="patients-focus glass-panel">
+					<div class="patients-focus__header">
+						<div>
+							<span class="section-kicker section-kicker--soft">Patienten</span>
+							<h2>Deine zugewiesenen Patienten</h2>
+							<p>Hier siehst du die zuletzt hinzugekommenen Patienten aus deiner Zuständigkeit.</p>
+						</div>
+
+						<button type="button" class="link-button" (click)="openPatientsOverview()">
+							Alle anzeigen
+							<ion-icon name="open-outline"></ion-icon>
+						</button>
+					</div>
+
+					<div class="patients-focus__list" *ngIf="latestPatientsPreview.length; else emptyPatientsState">
+						<article class="patient-spotlight" *ngFor="let patient of latestPatientsPreview; trackBy: trackPatient" (click)="openPatientDetails(patient)">
+							<div class="patient-spotlight__avatar">{{ patientInitials(patient) }}</div>
+							<div class="patient-spotlight__content">
+								<div class="patient-spotlight__topline">
+									<h3>{{ patientName(patient) }}</h3>
+									<span class="status-chip" [class.status-chip--success]="patient.status === 'active'" [class.status-chip--warning]="patient.status !== 'active'">
+										{{ statusLabel(patient.status) }}
+									</span>
+								</div>
+								<p class="patient-spotlight__number">{{ patient.patientNumber }}</p>
+								<p class="patient-spotlight__address">{{ patientAddress(patient) }}</p>
+								<div class="patient-spotlight__meta">
+									<span>{{ careLevelLabel(patient.careLevel) }}</span>
+									<span *ngIf="patient.phone">{{ patient.phone }}</span>
+								</div>
+							</div>
+							<button type="button" class="patient-spotlight__action" (click)="$event.stopPropagation(); openPatientDetails(patient)">
+								Details
+								<ion-icon name="chevron-forward-outline"></ion-icon>
+							</button>
+						</article>
+					</div>
+				</section>
+			</div>
+
+			<section class="dashboard-message glass-panel" *ngIf="errorMessage">
+				<ion-icon name="alert-circle-outline"></ion-icon>
+				<div>
+					<h3>Hinweis</h3>
+					<p>{{ errorMessage }}</p>
+				</div>
+			</section>
+		</ng-container>
+
+		<ng-template #loadingState>
+			<section class="home-hero glass-panel home-hero--loading">
+				<div class="home-skeleton home-skeleton--hero-copy">
+					<div class="home-skeleton__chip"></div>
+					<div class="home-skeleton__headline home-skeleton__headline--md"></div>
+					<div class="home-skeleton__line"></div>
+					<div class="home-skeleton__line home-skeleton__line--short"></div>
+					<div class="home-skeleton__button"></div>
+				</div>
+			</section>
+			<div class="home-content-grid">
+				<section class="route-focus glass-panel">
+					<div class="route-focus__header route-focus__header--loading">
+						<div class="home-skeleton home-skeleton--section-header">
+							<div class="home-skeleton__chip"></div>
+							<div class="home-skeleton__headline home-skeleton__headline--md"></div>
+							<div class="home-skeleton__line"></div>
+						</div>
+						<div class="home-skeleton__switcher">
+							<div class="home-skeleton__icon-button"></div>
+							<div class="home-skeleton__icon-button"></div>
+							<div class="home-skeleton__button"></div>
+						</div>
+					</div>
+					<div class="day-rail day-rail--loading">
+						<div class="home-skeleton home-skeleton--day-pill" *ngFor="let day of [1,2,3,4,5,6,7]"></div>
+					</div>
+					<div class="route-list">
+						<article class="home-skeleton home-skeleton--route-card" *ngFor="let route of [1,2]">
+							<div class="home-skeleton__route-top">
+								<div>
+									<div class="home-skeleton__line home-skeleton__line--tiny"></div>
+									<div class="home-skeleton__headline home-skeleton__headline--sm"></div>
+								</div>
+								<div class="home-skeleton__button home-skeleton__button--small"></div>
+							</div>
+							<div class="home-skeleton__metric-grid">
+								<div class="home-skeleton__mini-card" *ngFor="let metric of [1,2,3,4]"></div>
+							</div>
+							<div class="home-skeleton__stop" *ngFor="let stop of [1,2,3]"></div>
+						</article>
+					</div>
+				</section>
+				<section class="patients-focus glass-panel">
+					<div class="patients-focus__header patients-focus__header--loading">
+						<div class="home-skeleton home-skeleton--section-header">
+							<div class="home-skeleton__chip"></div>
+							<div class="home-skeleton__headline home-skeleton__headline--md"></div>
+							<div class="home-skeleton__line"></div>
+						</div>
+						<div class="home-skeleton__button"></div>
+					</div>
+					<div class="patients-focus__list">
+						<article class="home-skeleton home-skeleton--patient-card" *ngFor="let patient of [1,2,3,4]"></article>
+					</div>
+				</section>
+			</div>
+		</ng-template>
+
+		<ng-template #emptyRoutesState>
+			<div class="route-empty-state">
+				<ion-icon name="car-outline"></ion-icon>
+				<div>
+					<h3>Für diesen Tag sind noch keine Routen hinterlegt.</h3>
+					<p>Sobald dir Touren zugewiesen sind, erscheinen sie hier direkt in deiner Startansicht.</p>
+				</div>
+			</div>
+		</ng-template>
+
+		<ng-template #emptyPatientsState>
+			<div class="route-empty-state">
+				<ion-icon name="people-outline"></ion-icon>
+				<div>
+					<h3>Dir wurden noch keine Pflegekunden zugewiesen.</h3>
+					<p>Sobald du verantwortliche Pflegekunden hast, erscheinen sie hier als Schnellzugriff.</p>
+				</div>
+			</div>
+		</ng-template>
+	</div>
 </ion-content>

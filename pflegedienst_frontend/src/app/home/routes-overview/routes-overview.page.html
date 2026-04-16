@@ -1,0 +1,113 @@
+<ion-content [fullscreen]="true">
+  <div class="page-shell routes-overview-page" style="margin-top: 128px;">
+    <section class="routes-overview__hero glass-panel">
+
+      <div class="routes-overview__hero-content">
+        <div>
+          <span class="section-kicker">Wochenansicht</span>
+          <h1>Deine zugewiesenen Routen auf einen Blick.</h1>
+          <p>
+            Hier siehst du deine komplette Woche, kannst zwischen den Kalenderwochen wechseln und
+            jede Route direkt ansteuern. Die Detailseite folgt im nächsten Schritt.
+          </p>
+        </div>
+
+        <div class="routes-overview__controls">
+          <button type="button" class="week-button" (click)="loadPreviousWeek()" aria-label="Vorherige Woche" [disabled]="isBusy">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+            <span>Vorherige Woche</span>
+          </button>
+          <div class="week-pill" [class.week-pill--loading]="isWeekSwitching">
+            <span>{{ week?.label || 'Woche lädt...' }}</span>
+            <strong>{{ isWeekSwitching ? 'Routen werden geladen' : (totalRoutes + ' ' + (totalRoutes === 1 ? 'Route' : 'Routen')) }}</strong>
+          </div>
+          <button type="button" class="week-button" (click)="loadNextWeek()" aria-label="Nächste Woche" [disabled]="isBusy">
+            <span>Nächste Woche</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="routes-overview__content" *ngIf="!isLoading; else loadingState">
+      <article class="routes-overview__message glass-panel" *ngIf="errorMessage">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <div>
+          <h2>Hinweis</h2>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </article>
+
+      <div class="routes-overview__grid-shell" *ngIf="weekDays.length; else emptyState">
+        <div class="week-grid" [class.week-grid--switching]="isWeekSwitching">
+          <section class="day-column glass-panel" *ngFor="let day of weekDays; trackBy: trackDay" [class.day-column--today]="isToday(day.date)">
+            <div class="day-column__header">
+              <div>
+                <span>{{ day.weekdayLabel }}</span>
+                <h2>{{ formatDateLabel(day.date, { day: '2-digit', month: 'long' }) }}</h2>
+              </div>
+              <small>{{ day.routes.length }} {{ day.routes.length === 1 ? 'Route' : 'Routen' }}</small>
+            </div>
+
+            <div class="day-column__empty" *ngIf="!day.routes.length">
+              Keine Route geplant.
+            </div>
+
+            <article class="week-route-card" *ngFor="let route of day.routes; trackBy: trackRoute">
+              <div class="week-route-card__top">
+                <div>
+                  <span>{{ compactTime(route.shiftStartTime) }} Uhr</span>
+                  <h3>{{ route.routeName || 'Route ohne Namen' }}</h3>
+                </div>
+                <span class="status-chip status-chip--warning" *ngIf="route.hasOverride">Geändert</span>
+              </div>
+
+              <div class="week-route-card__facts">
+                <span>{{ route.stops.length }} Stopps</span>
+                <span>{{ routeDurationLabel(route) }}</span>
+                <span>{{ distanceLabel(route) }}</span>
+              </div>
+
+              <div class="week-route-card__patients" *ngIf="route.stops.length">
+                <span *ngFor="let stop of route.stops.slice(0, 3)">{{ stop.patientName }}</span>
+                <span *ngIf="route.stops.length > 3">+{{ route.stops.length - 3 }}</span>
+              </div>
+
+              <button type="button" class="week-route-card__action" (click)="showRouteDetailsUnavailable(route)" [disabled]="isWeekSwitching">
+                Details ansehen
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </button>
+            </article>
+          </section>
+        </div>
+
+        <div class="week-grid-overlay" *ngIf="isWeekSwitching" aria-hidden="true">
+          <div class="week-grid week-grid--overlay">
+            <section class="day-column glass-panel day-column--skeleton" *ngFor="let item of [1, 2, 3, 4, 5, 6, 7]">
+              <div class="routes-skeleton routes-skeleton__line routes-skeleton__line--small"></div>
+              <div class="routes-skeleton routes-skeleton__line routes-skeleton__line--headline"></div>
+              <div class="routes-skeleton routes-skeleton__pill"></div>
+              <div class="routes-skeleton routes-skeleton__card" *ngFor="let card of [1, 2]"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <ng-template #loadingState>
+      <section class="week-grid">
+        <div class="skeleton-box" *ngFor="let item of [1, 2, 3, 4, 5, 6, 7]"></div>
+      </section>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <article class="routes-overview__message glass-panel">
+        <ion-icon name="calendar-clear-outline"></ion-icon>
+        <div>
+          <h2>Keine Routen gefunden</h2>
+          <p>Für diese Woche wurden dir aktuell noch keine Routen zugewiesen.</p>
+        </div>
+      </article>
+    </ng-template>
+  </div>
+</ion-content>

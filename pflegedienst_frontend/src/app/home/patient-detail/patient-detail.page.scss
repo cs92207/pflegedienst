@@ -1,0 +1,512 @@
+.caregiver-patient-detail {
+  display: grid;
+  gap: 24px;
+}
+
+.detail-action-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(6px);
+}
+
+.detail-action-overlay__card {
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 26px;
+  border-radius: 28px;
+  text-align: center;
+
+  strong {
+    color: #0f172a;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+}
+
+.detail-action-overlay__spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 4px solid rgba(15, 118, 110, 0.14);
+  border-top-color: #0f766e;
+  border-right-color: #2563eb;
+  animation: patient-detail-spin 0.85s linear infinite;
+}
+
+.detail-hero,
+.detail-section,
+.detail-message {
+  padding: 24px;
+  border-radius: 28px;
+}
+
+.detail-hero__topbar,
+.detail-hero__content,
+.section-header,
+.editor-card__header,
+.visit-card__header,
+.editor-actions,
+.visit-todos__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.detail-hero {
+  display: grid;
+  gap: 22px;
+}
+
+.detail-hero__content {
+  align-items: end;
+}
+
+.detail-hero__content h1 {
+  margin: 12px 0 8px;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1;
+  color: #0f172a;
+}
+
+.detail-hero__content p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.detail-hero__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-hero__facts div,
+.info-grid article,
+.info-card,
+.sub-panel,
+.editor-card,
+.visit-card,
+.visit-todo {
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.detail-hero__facts div {
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.detail-hero__facts span,
+.info-grid span,
+.editor-grid span,
+.visit-todos__header span,
+.visit-card__header small,
+.editor-card__header small,
+.todo-origin {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detail-hero__facts strong,
+.info-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.nav-button,
+.action-button,
+.detail-tabs button {
+  border: 0;
+  cursor: pointer;
+}
+
+.nav-button,
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.nav-button,
+.action-button--muted {
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+}
+
+.action-button {
+  background: linear-gradient(135deg, #0f766e, #2563eb);
+  color: white;
+}
+
+.action-button--danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.detail-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.detail-tabs button {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-weight: 700;
+}
+
+.detail-tabs button.active {
+  background: linear-gradient(135deg, #0f766e, #2563eb);
+  color: white;
+}
+
+.detail-section {
+  display: grid;
+  gap: 20px;
+}
+
+.detail-section h2,
+.sub-panel h3,
+.editor-card h3,
+.visit-card h3,
+.visit-todos__header h4,
+.editor-card h4 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.section-header p,
+.empty-copy,
+.long-text,
+.info-card p,
+.info-card small,
+.visit-card__header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.info-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.info-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.info-grid article {
+  padding: 18px;
+  border-radius: 20px;
+}
+
+.detail-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.sub-panel,
+.editor-card,
+.visit-card,
+.detail-message {
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.card-stack,
+.visit-todos,
+.chip-list {
+  display: grid;
+  gap: 14px;
+}
+
+.chip-list {
+  grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+}
+
+.data-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.data-chip--warning {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.editor-grid--visit {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.editor-grid--todo {
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.span-3 {
+  grid-column: span 3;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  background: white;
+  color: #0f172a;
+  padding: 14px 16px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:disabled,
+textarea:disabled,
+button:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.visit-list {
+  display: grid;
+  gap: 14px;
+}
+
+.visit-list-card {
+  width: 100%;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 24px;
+  background: rgba(248, 250, 252, 0.82);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.visit-list-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+}
+
+.visit-list-card__header,
+.visit-list-card__meta,
+.visit-list-card__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.visit-list-card__header h3,
+.visit-list-card__footer strong {
+  margin: 0;
+  color: #0f172a;
+}
+
+.visit-list-card__header p,
+.visit-list-card__meta span,
+.visit-list-card__footer span {
+  margin: 0;
+  color: #64748b;
+}
+
+.visit-list-card__meta {
+  font-size: 13px;
+}
+
+.detail-message {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detail-message ion-icon {
+  font-size: 30px;
+  color: #2563eb;
+}
+
+.detail-hero--loading,
+.detail-section--loading {
+  min-height: 180px;
+}
+
+.detail-skeleton {
+  display: grid;
+  gap: 18px;
+}
+
+.detail-skeleton__row,
+.detail-skeleton__stack,
+.detail-skeleton__grid {
+  display: grid;
+  gap: 14px;
+}
+
+.detail-skeleton__row--between {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.detail-skeleton__grid--facts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-skeleton__grid--content {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-skeleton__pill,
+.detail-skeleton__line,
+.detail-skeleton__card {
+  display: block;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.72) 25%, rgba(255,255,255,0.96) 37%, rgba(255,255,255,0.72) 63%);
+  background-size: 400% 100%;
+}
+
+.detail-skeleton__shine {
+  animation: patient-detail-shine 1.25s ease infinite;
+}
+
+.detail-skeleton__pill {
+  height: 42px;
+  width: 144px;
+  border-radius: 999px;
+}
+
+.detail-skeleton__pill--short {
+  width: 112px;
+}
+
+.detail-skeleton__line {
+  height: 16px;
+}
+
+.detail-skeleton__line--label {
+  width: 120px;
+}
+
+.detail-skeleton__line--title {
+  width: min(420px, 82%);
+  height: 44px;
+}
+
+.detail-skeleton__line--section {
+  width: 180px;
+  height: 28px;
+}
+
+.detail-skeleton__card {
+  min-height: 92px;
+}
+
+.detail-skeleton__card--tall {
+  min-height: 160px;
+}
+
+.detail-tabs--loading {
+  pointer-events: none;
+}
+
+@keyframes patient-detail-shine {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes patient-detail-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 1100px) {
+  .detail-hero__content,
+  .detail-columns,
+  .info-grid--3,
+  .detail-hero__facts,
+  .detail-skeleton__grid--facts,
+  .detail-skeleton__grid--content {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-hero__content,
+  .section-header,
+  .editor-card__header,
+  .editor-actions,
+  .visit-todos__header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 720px) {
+  .caregiver-patient-detail {
+    padding: 18px;
+  }
+
+  .editor-grid,
+  .editor-grid--visit,
+  .editor-grid--todo,
+  .detail-columns,
+  .info-grid--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2,
+  .span-3 {
+    grid-column: span 1;
+  }
+
+  .nav-button,
+  .action-button {
+    width: 100%;
+  }
+}

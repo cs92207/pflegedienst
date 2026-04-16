@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Patient, PatientListItem, ResponsibleEmployee } from '../models/patient';
+import { Patient, PatientAgreedService, PatientDefaultTodo, PatientListItem, PatientVisit, PatientVisitTodo, ResponsibleEmployee } from '../models/patient';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -60,6 +60,24 @@ export class AdminPatientService {
     };
   }
 
+  async updateAgreedServices(patientId: number, agreedServices: PatientAgreedService[]): Promise<{ message: string; agreedServices: PatientAgreedService[] }> {
+    const response = await firstValueFrom(this.http.put<any>(
+      `${this.authService.apiURL}admin/patients/${patientId}/agreed-services`,
+      {
+        agreed_services: agreedServices.length ? agreedServices : null,
+      },
+      { headers: await this.buildHeaders() }
+    ));
+
+    return {
+      message: response?.message || 'Leistungen wurden gespeichert.',
+      agreedServices: (response?.agreed_services ?? []).map((service: any) => ({
+        title: service?.title ?? '',
+        notes: service?.notes ?? '',
+      })),
+    };
+  }
+
   async deletePatient(id: number): Promise<{ message: string }> {
     const response = await firstValueFrom(this.http.delete<any>(
       `${this.authService.apiURL}admin/patients/${id}`,
@@ -104,6 +122,7 @@ export class AdminPatientService {
       mobility: p.mobility || null,
       nutrition: p.nutrition || null,
       communication_ability: p.communicationAbility || null,
+      agreed_services: p.agreedServices?.length ? p.agreedServices : null,
       treating_doctors: p.treatingDoctors?.length ? p.treatingDoctors : null,
       emergency_contacts: p.emergencyContacts?.length ? p.emergencyContacts : null,
       legal_guardian: p.legalGuardian?.name ? p.legalGuardian : null,
@@ -113,6 +132,7 @@ export class AdminPatientService {
       power_of_attorney_notes: p.powerOfAttorneyNotes || null,
       has_dnr_order: p.hasDnrOrder ?? false,
       responsible_employee_ids: p.responsibleEmployeeIds ?? p.responsibleEmployees?.map((employee) => employee.id) ?? [],
+      default_todos: p.defaultTodos?.map((todo) => this.toDefaultTodoPayload(todo)) ?? [],
     };
   }
 
@@ -167,6 +187,10 @@ export class AdminPatientService {
       mobility: d?.mobility ?? '',
       nutrition: d?.nutrition ?? '',
       communicationAbility: d?.communication_ability ?? '',
+      agreedServices: (d?.agreed_services ?? []).map((service: any) => ({
+        title: service?.title ?? '',
+        notes: service?.notes ?? '',
+      })),
       treatingDoctors: (d?.treating_doctors ?? []).map((doc: any) => ({
         name: doc?.name ?? '', specialty: doc?.specialty ?? '', phone: doc?.phone ?? ''
       })),
@@ -185,8 +209,66 @@ export class AdminPatientService {
       hasDnrOrder: !!d?.has_dnr_order,
       responsibleEmployees: (d?.responsible_users ?? []).map((user: any) => this.normalizeResponsibleEmployee(user)),
       responsibleEmployeeIds: (d?.responsible_users ?? []).map((user: any) => Number(user?.id ?? 0)).filter((id: number) => id > 0),
+      defaultTodos: (d?.default_todos ?? []).map((todo: any) => this.normalizeDefaultTodo(todo)),
+      visits: (d?.visits ?? []).map((visit: any) => this.normalizeVisit(visit)),
       createdAt: d?.created_at ?? '',
       updatedAt: d?.updated_at ?? '',
+    };
+  }
+
+  private normalizeDefaultTodo(data: any): PatientDefaultTodo {
+    return {
+      id: Number(data?.id ?? 0),
+      title: data?.title ?? '',
+      notes: data?.notes ?? '',
+      sortOrder: Number(data?.sort_order ?? 0),
+      source: data?.source === 'admin' ? 'admin' : 'caregiver',
+      createdByUser: data?.created_by_user ? this.normalizeResponsibleEmployee(data.created_by_user) : null,
+      createdAt: data?.created_at ?? '',
+      updatedAt: data?.updated_at ?? '',
+    };
+  }
+
+  private normalizeVisit(data: any): PatientVisit {
+    return {
+      id: Number(data?.id ?? 0),
+      visitDate: data?.visit_date ?? '',
+      startTime: data?.start_time ?? '',
+      endTime: data?.end_time ?? '',
+      notes: data?.notes ?? '',
+      isReleasedToAdmin: !!data?.is_released_to_admin,
+      releasedToAdminAt: data?.released_to_admin_at ?? '',
+      releasedToAdminByUser: data?.released_to_admin_by_user ? this.normalizeResponsibleEmployee(data.released_to_admin_by_user) : null,
+      createdByUser: data?.created_by_user ? this.normalizeResponsibleEmployee(data.created_by_user) : null,
+      todos: (data?.todos ?? []).map((todo: any) => this.normalizeVisitTodo(todo)),
+      createdAt: data?.created_at ?? '',
+      updatedAt: data?.updated_at ?? '',
+    };
+  }
+
+  private normalizeVisitTodo(data: any): PatientVisitTodo {
+    return {
+      id: Number(data?.id ?? 0),
+      patientDefaultTodoId: data?.patient_default_todo_id ?? null,
+      title: data?.title ?? '',
+      notes: data?.notes ?? '',
+      isCompleted: !!data?.is_completed,
+      completedAt: data?.completed_at ?? '',
+      sortOrder: Number(data?.sort_order ?? 0),
+      source: data?.source === 'default' ? 'default' : 'manual',
+      createdByUser: data?.created_by_user ? this.normalizeResponsibleEmployee(data.created_by_user) : null,
+      createdAt: data?.created_at ?? '',
+      updatedAt: data?.updated_at ?? '',
+    };
+  }
+
+  private toDefaultTodoPayload(todo: PatientDefaultTodo): any {
+    return {
+      id: todo.id || undefined,
+      title: todo.title,
+      notes: todo.notes || null,
+      sort_order: todo.sortOrder ?? 0,
+      source: todo.source,
     };
   }
 

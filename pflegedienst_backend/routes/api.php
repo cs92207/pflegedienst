@@ -4,6 +4,8 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentRequestController;
 use App\Http\Controllers\AppointmentScriptController;
 use App\Http\Controllers\AdminAccountController;
+use App\Http\Controllers\CaregiverPatientController;
+use App\Http\Controllers\CaregiverRouteController;
 use App\Http\Controllers\DailyRouteController;
 use App\Http\Controllers\WeeklyRoutePlanController;
 use App\Http\Controllers\PatientController;
@@ -58,6 +60,19 @@ Route::get('/user-by-id/{userid}', [AuthController::class, 'getUserByID']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/password/change', [AuthController::class, 'changePassword']);
+    Route::get('/my-weekly-route-plan', [CaregiverRouteController::class, 'index']);
+    Route::get('/my-patients', [CaregiverPatientController::class, 'index']);
+    Route::get('/my-patients/{patient}', [CaregiverPatientController::class, 'show']);
+    Route::post('/my-patients/{patient}/default-todos', [CaregiverPatientController::class, 'storeDefaultTodo']);
+    Route::put('/my-patients/{patient}/default-todos/{defaultTodo}', [CaregiverPatientController::class, 'updateDefaultTodo']);
+    Route::delete('/my-patients/{patient}/default-todos/{defaultTodo}', [CaregiverPatientController::class, 'destroyDefaultTodo']);
+    Route::post('/my-patients/{patient}/visits', [CaregiverPatientController::class, 'storeVisit']);
+    Route::put('/my-patients/{patient}/visits/{visit}', [CaregiverPatientController::class, 'updateVisit']);
+    Route::put('/my-patients/{patient}/visits/{visit}/release', [CaregiverPatientController::class, 'updateVisitRelease']);
+    Route::delete('/my-patients/{patient}/visits/{visit}', [CaregiverPatientController::class, 'destroyVisit']);
+    Route::post('/my-patients/{patient}/visits/{visit}/todos', [CaregiverPatientController::class, 'storeVisitTodo']);
+    Route::put('/my-patients/{patient}/visits/{visit}/todos/{todo}', [CaregiverPatientController::class, 'updateVisitTodo']);
+    Route::delete('/my-patients/{patient}/visits/{visit}/todos/{todo}', [CaregiverPatientController::class, 'destroyVisitTodo']);
 });
 
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
@@ -71,6 +86,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('/patients', [PatientController::class, 'index']);
     Route::post('/patients', [PatientController::class, 'store']);
     Route::get('/patients/{patient}', [PatientController::class, 'show']);
+    Route::put('/patients/{patient}/agreed-services', [PatientController::class, 'updateAgreedServices']);
     Route::put('/patients/{patient}', [PatientController::class, 'update']);
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy']);
 

@@ -1,0 +1,369 @@
+.routes-overview-page {
+  display: grid;
+  gap: 24px;
+}
+
+.routes-overview__hero {
+  padding: 22px 24px;
+  border-radius: 26px;
+  display: grid;
+  gap: 16px;
+}
+
+.routes-overview__back,
+.week-button,
+.week-route-card__action {
+  border: 0;
+  cursor: pointer;
+}
+
+.routes-overview__back {
+  justify-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.routes-overview__hero-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) auto;
+  gap: 18px;
+
+  h1 {
+    margin: 10px 0 10px;
+    max-width: 15ch;
+    font-size: clamp(28px, 3.5vw, 42px);
+    line-height: 1;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    max-width: 60ch;
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+}
+
+.routes-overview__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.week-button {
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.58;
+    cursor: default;
+  }
+}
+
+.week-pill {
+  padding: 12px 16px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #0f766e, #2563eb);
+  color: white;
+
+  span,
+  strong {
+    display: block;
+  }
+
+  span {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  strong {
+    margin-top: 4px;
+    font-size: 18px;
+  }
+}
+
+.week-pill--loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.week-pill--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 15%, rgba(255,255,255,0.26) 50%, rgba(255,255,255,0) 85%);
+  transform: translateX(-100%);
+  animation: routes-pill-shine 1.3s ease-in-out infinite;
+}
+
+.routes-overview__content {
+  display: grid;
+  gap: 20px;
+}
+
+.routes-overview__grid-shell {
+  position: relative;
+}
+
+.routes-overview__message {
+  padding: 24px 28px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  ion-icon {
+    font-size: 28px;
+    color: #2563eb;
+  }
+
+  h2 {
+    margin: 0 0 6px;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+  }
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.week-grid--switching {
+  opacity: 0.22;
+  transform: scale(0.995);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.week-grid-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.week-grid--overlay {
+  width: 100%;
+}
+
+.day-column {
+  padding: 20px;
+  border-radius: 26px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.day-column--today {
+  outline: 2px solid rgba(37, 99, 235, 0.18);
+}
+
+.day-column--skeleton {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.day-column__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  span {
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  h2 {
+    margin: 6px 0 0;
+    font-size: 24px;
+    color: #0f172a;
+  }
+
+  small {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.day-column__empty {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.9);
+  color: #64748b;
+  font-size: 14px;
+}
+
+.week-route-card {
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: grid;
+  gap: 14px;
+}
+
+.week-route-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  span {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  h3 {
+    margin: 6px 0 0;
+    font-size: 18px;
+    color: #0f172a;
+  }
+}
+
+.week-route-card__facts,
+.week-route-card__patients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.week-route-card__facts span,
+.week-route-card__patients span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.week-route-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+
+  &:disabled {
+    opacity: 0.58;
+    cursor: default;
+  }
+}
+
+.routes-skeleton {
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(226,232,240,0.95) 25%, rgba(255,255,255,1) 37%, rgba(226,232,240,0.95) 63%);
+  background-size: 400% 100%;
+  animation: routes-skeleton-shine 1.3s ease infinite;
+}
+
+.routes-skeleton__line--small {
+  width: 90px;
+  height: 14px;
+}
+
+.routes-skeleton__line--headline {
+  width: 150px;
+  max-width: 100%;
+  height: 30px;
+  margin-top: 8px;
+}
+
+.routes-skeleton__pill {
+  width: 100%;
+  height: 34px;
+  margin-top: 10px;
+}
+
+.routes-skeleton__card {
+  width: 100%;
+  height: 116px;
+  border-radius: 20px;
+  margin-top: 14px;
+}
+
+@keyframes routes-skeleton-shine {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes routes-pill-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@media (max-width: 1280px) {
+  .week-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .routes-overview__hero-content {
+    grid-template-columns: 1fr;
+  }
+
+  .routes-overview__controls {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .week-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .routes-overview-page {
+    padding: 18px;
+  }
+
+  .routes-overview__controls {
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .week-button {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .week-pill {
+    width: 100%;
+  }
+
+  .week-grid {
+    grid-template-columns: 1fr;
+  }
+}
