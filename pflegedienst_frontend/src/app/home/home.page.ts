@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DailyRoutePlanDay, DailyRoutePlanRoute, DailyRoutePlanWeek } from '../models/daily-route';
 import { PatientListItem } from '../models/patient';
 import { User } from '../models/user';
@@ -27,12 +26,14 @@ export class HomePage implements OnInit {
     private authService: AuthService,
     private caregiverRouteService: CaregiverRouteService,
     private caregiverPatientService: CaregiverPatientService,
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController
   ) {}
 
   async ngOnInit() {
-    await this.loadDashboard();
+    const weekStart = this.activatedRoute.snapshot.queryParamMap.get('weekStart') || undefined;
+    const selectedDate = this.activatedRoute.snapshot.queryParamMap.get('selectedDate') || undefined;
+    await this.loadDashboard(weekStart, selectedDate);
   }
 
   openPrimaryAction() {
@@ -141,15 +142,19 @@ export class HomePage implements OnInit {
     await this.router.navigate(['/home/patients', patient.id]);
   }
 
-  async showRouteDetailsUnavailable(route: DailyRoutePlanRoute): Promise<void> {
-    const toast = await this.toastController.create({
-      message: `Details für "${route.routeName || 'diese Route'}" folgen später.`,
-      duration: 2200,
-      position: 'top',
-      color: 'medium'
+  async openRouteDetails(route: DailyRoutePlanRoute): Promise<void> {
+    await this.router.navigate(['/home/routes', route.scope, route.id], {
+      queryParams: {
+        weekStart: this.week?.startDate || undefined,
+        routeDate: route.routeDate || this.selectedDay?.date || undefined,
+        returnTo: 'home',
+        selectedDate: this.selectedDay?.date || undefined,
+      },
+      state: {
+        route,
+        routeDayDate: this.selectedDay?.date || route.routeDate || undefined,
+      },
     });
-
-    await toast.present();
   }
 
   isToday(date: string): boolean {

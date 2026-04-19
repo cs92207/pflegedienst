@@ -4,6 +4,10 @@ import { HomePage } from './home.page';
 
 const routes: Routes = [
   {
+    path: 'routes/:scope/:id',
+    loadChildren: () => import('./route-detail/route-detail.module').then((m) => m.RouteDetailPageModule),
+  },
+  {
     path: 'patients/:patientId/visits/:visitId',
     loadChildren: () => import('./visit-detail/visit-detail.module').then((m) => m.VisitDetailPageModule),
   },

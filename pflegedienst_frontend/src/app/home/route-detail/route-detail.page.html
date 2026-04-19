@@ -1,0 +1,245 @@
+<ion-content [fullscreen]="true">
+  <div class="page-shell route-detail-page" style="margin-top: 128px;" *ngIf="!isLoading; else loadingState">
+    <article class="route-detail-message glass-panel" *ngIf="errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <div>
+        <h2>Hinweis</h2>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </article>
+
+    <ng-container *ngIf="!errorMessage && routeDetail as routeDetailData">
+      <section class="route-detail-hero glass-panel">
+        <div class="route-detail-hero__topbar">
+          <button type="button" class="nav-button" (click)="goBack()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            Zurück zur Übersicht
+          </button>
+
+          <span class="status-chip status-chip--warning" *ngIf="routeDetailData.hasOverride">Geändert</span>
+        </div>
+
+        <div class="route-detail-hero__content">
+          <div>
+            <span class="section-kicker">Routendetails</span>
+            <h1>{{ pageTitle }}</h1>
+            <p>{{ routeDateLabel }} | {{ routeStops.length }} {{ routeStops.length === 1 ? 'Stopp' : 'Stopps' }}</p>
+          </div>
+
+          <div class="route-detail-hero__facts">
+            <div>
+              <span>Start</span>
+              <strong>{{ compactTime(routeDetailData.shiftStartTime) }} Uhr</strong>
+            </div>
+            <div>
+              <span>Gesamtdauer</span>
+              <strong>{{ totalDurationLabel }}</strong>
+            </div>
+            <div>
+              <span>Distanz</span>
+              <strong>{{ totalDistanceLabel }}</strong>
+            </div>
+            <div>
+              <span>Fahrzeit</span>
+              <strong>{{ totalTravelLabel }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="route-detail-layout">
+        <section class="route-detail-section glass-panel">
+          <div class="section-header">
+            <div>
+              <h2>Zeitstrahl der Route</h2>
+              <p>Start, alle Stopps inklusive Fahrzeiten sowie das Tourende sind chronologisch dargestellt.</p>
+            </div>
+          </div>
+
+          <div class="route-timeline">
+            <article
+              class="route-timeline__entry"
+              *ngFor="let entry of timelineEntries; trackBy: trackTimeline"
+              [class.route-timeline__entry--travel]="entry.type === 'travel'"
+              [class.route-timeline__entry--point]="entry.type !== 'travel'"
+            >
+              <ng-container *ngIf="entry.type !== 'travel'; else travelEntry">
+                <div class="route-timeline__rail">
+                  <span class="route-timeline__dot" [class.route-timeline__dot--stop]="entry.type === 'stop'"></span>
+                </div>
+
+                <div class="route-timeline__content">
+                  <div class="route-timeline__time">{{ entry.timeLabel }}</div>
+                  <div class="route-timeline__card">
+                    <div class="route-timeline__card-top">
+                      <div>
+                        <span class="route-timeline__tag">{{ entry.metaLabel }}</span>
+                        <h3>{{ entry.title }}</h3>
+                      </div>
+                      <button
+                        *ngIf="entry.isClickablePatient"
+                        type="button"
+                        class="text-button"
+                        (click)="openPatientDetails(entry.patientId)"
+                      >
+                        Patient öffnen
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                      </button>
+                    </div>
+
+                    <p>{{ entry.subtitle }}</p>
+                    <div class="route-timeline__note" *ngIf="entry.note">{{ entry.note }}</div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #travelEntry>
+                <div class="route-timeline__travel-pill">
+                  <ion-icon name="car-outline"></ion-icon>
+                  <span>{{ travelDuration(entry) }} Fahrt</span>
+                  <small>{{ travelDistance(entry) }}</small>
+                </div>
+              </ng-template>
+            </article>
+          </div>
+        </section>
+
+        <aside class="route-detail-sidebar">
+          <section class="route-detail-section glass-panel">
+            <div class="section-header">
+              <div>
+                <h2>Route auf der Karte</h2>
+                <p>Die gesamte Tour inklusive Stopps wird übersichtlich auf der Karte dargestellt.</p>
+              </div>
+            </div>
+
+            <div class="route-map-empty" *ngIf="!hasMapPreview; else mapState">
+              <ion-icon name="map-outline"></ion-icon>
+              <p>Für diese Route liegen aktuell noch keine Kartendaten vor.</p>
+            </div>
+
+            <ng-template #mapState>
+              <div #routeMap class="route-map"></div>
+            </ng-template>
+          </section>
+
+          <section class="route-detail-section glass-panel route-summary">
+            <div class="section-header">
+              <div>
+                <h2>Tourübersicht</h2>
+                <p>Wichtige Eckdaten zu Start, Ziel und Einsatzumfang.</p>
+              </div>
+            </div>
+
+            <div class="route-summary__grid">
+              <article>
+                <span>Startadresse</span>
+                <strong>{{ routeDetailData.startAddress || 'Nicht hinterlegt' }}</strong>
+              </article>
+              <article>
+                <span>Zieladresse</span>
+                <strong>{{ routeDetailData.endAddress || 'Nicht hinterlegt' }}</strong>
+              </article>
+              <article>
+                <span>Pflegezeit gesamt</span>
+                <strong>{{ totalServiceLabel }}</strong>
+              </article>
+              <article>
+                <span>Geplantes Ende</span>
+                <strong>{{ endTimeLabel }} Uhr</strong>
+              </article>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="page-shell route-detail-page" style="margin-top: 128px;">
+      <section class="route-detail-hero glass-panel route-detail-hero--loading route-detail-skeleton">
+        <div class="route-detail-skeleton__topbar">
+          <div class="route-detail-skeleton__pill route-detail-skeleton__pill--wide"></div>
+          <div class="route-detail-skeleton__pill route-detail-skeleton__pill--short"></div>
+        </div>
+
+        <div class="route-detail-skeleton__hero-content">
+          <div class="route-detail-skeleton__copy">
+            <div class="route-detail-skeleton__kicker"></div>
+            <div class="route-detail-skeleton__headline"></div>
+            <div class="route-detail-skeleton__line"></div>
+          </div>
+
+          <div class="route-detail-skeleton__facts">
+            <div class="route-detail-skeleton__fact" *ngFor="let fact of [1, 2, 3, 4]"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="route-detail-layout">
+        <section class="route-detail-section glass-panel route-detail-section--loading route-detail-skeleton">
+          <div class="route-detail-skeleton__section-header">
+            <div>
+              <div class="route-detail-skeleton__headline route-detail-skeleton__headline--section"></div>
+              <div class="route-detail-skeleton__line route-detail-skeleton__line--medium"></div>
+            </div>
+          </div>
+
+          <div class="route-detail-skeleton__timeline">
+            <div class="route-detail-skeleton__timeline-item" *ngFor="let item of [1, 2, 3, 4, 5]">
+              <div class="route-detail-skeleton__timeline-rail">
+                <span class="route-detail-skeleton__timeline-dot"></span>
+              </div>
+              <div class="route-detail-skeleton__timeline-content">
+                <div class="route-detail-skeleton__time"></div>
+                <div class="route-detail-skeleton__card">
+                  <div class="route-detail-skeleton__card-top">
+                    <div>
+                      <div class="route-detail-skeleton__kicker route-detail-skeleton__kicker--small"></div>
+                      <div class="route-detail-skeleton__headline route-detail-skeleton__headline--card"></div>
+                    </div>
+                    <div class="route-detail-skeleton__pill route-detail-skeleton__pill--tiny"></div>
+                  </div>
+                  <div class="route-detail-skeleton__line route-detail-skeleton__line--medium"></div>
+                  <div class="route-detail-skeleton__line route-detail-skeleton__line--short"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="route-detail-sidebar">
+          <section class="route-detail-section glass-panel route-detail-section--loading route-detail-skeleton">
+            <div class="route-detail-skeleton__section-header">
+              <div>
+                <div class="route-detail-skeleton__headline route-detail-skeleton__headline--section"></div>
+                <div class="route-detail-skeleton__line route-detail-skeleton__line--medium"></div>
+              </div>
+            </div>
+
+            <div class="route-detail-skeleton__map">
+              <div class="route-detail-skeleton__map-glow"></div>
+              <div class="route-detail-skeleton__map-path"></div>
+              <span class="route-detail-skeleton__map-marker route-detail-skeleton__map-marker--one"></span>
+              <span class="route-detail-skeleton__map-marker route-detail-skeleton__map-marker--two"></span>
+              <span class="route-detail-skeleton__map-marker route-detail-skeleton__map-marker--three"></span>
+            </div>
+          </section>
+
+          <section class="route-detail-section glass-panel route-detail-section--loading route-detail-skeleton">
+            <div class="route-detail-skeleton__section-header">
+              <div>
+                <div class="route-detail-skeleton__headline route-detail-skeleton__headline--section"></div>
+                <div class="route-detail-skeleton__line route-detail-skeleton__line--medium"></div>
+              </div>
+            </div>
+
+            <div class="route-detail-skeleton__summary-grid">
+              <div class="route-detail-skeleton__fact" *ngFor="let item of [1, 2, 3, 4]"></div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </ng-template>
+</ion-content>

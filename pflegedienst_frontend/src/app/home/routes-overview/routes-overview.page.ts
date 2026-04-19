@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
 import { DailyRoutePlanDay, DailyRoutePlanRoute, DailyRoutePlanWeek } from '../../models/daily-route';
 import { CaregiverRouteService } from '../../services/caregiver-route.service';
 
@@ -21,7 +20,6 @@ export class RoutesOverviewPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private caregiverRouteService: CaregiverRouteService,
     private router: Router,
-    private toastController: ToastController
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -63,15 +61,18 @@ export class RoutesOverviewPage implements OnInit {
     });
   }
 
-  async showRouteDetailsUnavailable(route: DailyRoutePlanRoute): Promise<void> {
-    const toast = await this.toastController.create({
-      message: `Details für "${route.routeName || 'diese Route'}" folgen später.`,
-      duration: 2200,
-      position: 'top',
-      color: 'medium'
+  async openRouteDetails(route: DailyRoutePlanRoute): Promise<void> {
+    await this.router.navigate(['/home/routes', route.scope, route.id], {
+      queryParams: {
+        weekStart: this.week?.startDate || undefined,
+        routeDate: route.routeDate || undefined,
+        returnTo: 'routes',
+      },
+      state: {
+        route,
+        routeDayDate: route.routeDate || undefined,
+      },
     });
-
-    await toast.present();
   }
 
   routeDurationLabel(route: DailyRoutePlanRoute): string {

@@ -73,7 +73,7 @@
                 <span *ngIf="route.stops.length > 3">+{{ route.stops.length - 3 }}</span>
               </div>
 
-              <button type="button" class="week-route-card__action" (click)="showRouteDetailsUnavailable(route)" [disabled]="isWeekSwitching">
+              <button type="button" class="week-route-card__action" (click)="openRouteDetails(route)" [disabled]="isWeekSwitching">
                 Details ansehen
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </button>

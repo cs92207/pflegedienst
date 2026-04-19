@@ -24,10 +24,7 @@ Pfleger Dashboard ✔️
 
 
 
-
-Routen Details
-
-Pfleger Pflegekunden Dashboard 
+Pfleger Pflegekunden Dashboard  ✔️
   - Pfleger bekommt ein Dashboard mit Kundendetails von ihm verwaltete Kunden ✔️
   - Hier hat er zudem eine Todo-Liste, was gemacht werden muss ✔️
   - Er kann bei jedem Besuch auf Besuch erstellen klicken. ✔️
@@ -36,21 +33,51 @@ Pfleger Pflegekunden Dashboard
   - Und der Pfleger kann sich hier direkt für jeden Besuch Notizen machen (für spätere Dokumentation) ✔️
   - Im Admin Dashboard kann man die Besuche auch angelegt sehen sieht aber nur nach manueller Freigabe auch Todos und Notizen ✔️
 
-Zugesicherte Leistungen für Kunde verwalten
+Zugesicherte Leistungen für Kunde verwalten ✔️
   - Im Admin Panel kann man für jeden Kunden die vereinbarten Leistungen hinterlegen ✔️
   - Im Admin Panel können zudem Standart-Todos für einen Kunden eingetragen werden ✔️
   - Pfleger sehen für ihren Kunden alle Leistungen die zu erbringen sind ✔️
   - Pfleger sehen alle Standart-Todos, die aus dem Admin Panel kommen (können aber eigene hinzufügen, Standart-Todos jedoch nur nach Freigabe löschen oder updaten) ✔️
 
 
-Routen Details
-- Wenn Pfleger auf Route in der Home Page klickt, Details Seite öffnen
-- Zeitplan (Zeitstrahl) mit allen Stopps und Uhrzeiten inklusive Start und Stopp
-- Patienten werden bei den Stopps angezeigt, bei klickt, kommt man auf Patient Details Seite
+Routen Details ✔️
+- Wenn Pfleger auf Route in der Home Page klickt, Details Seite öffnen ✔️ 
+- Zeitplan (Zeitstrahl) mit allen Stopps und Uhrzeiten inklusive Start und Stopp ✔️
+- Patienten werden bei den Stopps angezeigt, bei klickt, kommt man auf Patient Details Seite ✔️
+- Route auf Karte anzeigen lassen ✔️
 
 
 Dokumente für Kunden verwalten
+- Im Admin Panel gibt es einen neuen Reiter "Dokumente"
+- Hier können Verträge, Verordnungen, Angebote und sonstige Dokumente / Dateien hochgeladen werden
+- Diese Dokumente können dort im Admin Panel dann CRUD verwaltet und gedownloaded werden
+- Die Dokumente sind nur im Admin Panel sichtbar und nicht vom Pfleger einsehbar (DSGVO)
 
-Mitarbeiter Urlaubsplanung
+Bitte erstelle als nächstes das Feature, dass man bei Pflegepatienten Dokumente hinterlegen kann.
+Im Admin Panel bei den Pflegekunden Details soll es hier einen neuen Tab "Dokumente" geben.
+Hier kann man Dokumente wie Verträge, Verodnungen, Angebote und sonstige Dokumente / Dateien
+hochladen können. Diese können hier im Admin Panel bei den Pflegekunden Details auch CRUD verwaltet
+und gedownloaded werden. Die Dokumente sind allerdings AUSSCHLIEßLICH im Admin Panel bei den 
+Pflegekunden Details sichtbar und können nicht vom Pfelger etc. gesehen / gedownloadet werden
+(DSGVO konform bitte!!!). Update hierzu zuerst das Laravel Backend und erstelle hier Migration und 
+Update Model und Controller. Update danach das Angular Frontend mit dem Service und füge danach 
+erst das eigentliche Feature im Admin Panel hinzu.
+
+
+Mitarbeiter Dienstplan 
+- Im Admin Panel neuer Punkt "Dienstplan"
+- Hier kann der wöchentliche Dienstplan erstellt werden im Zusammenhang mit den Routen, die die Pfleger fahren müssen
+- Der Dienstplan ist als Wochen-Tabellen Ansicht verfügbar
+- Der Dienstplan kann als PDF oder Excel gedownloadet werden 
+- Der Dienstplan kann wie der Routenplan global für jede Woche wiederholend erstellt werden und man kann einzelne Änderungen für bestimmte Tage festlegen
+- Wenn im Dienstplan was geändert wird, soll automatisch geprüft werden, ob dann auch was im Routenplan geändert werden muss 
+- Grundsätzlich wird der Dienstplan mit dem Routenplan genereiert
+
+Dienstplan auf Home Seite für Pfleger 
+
+
+Urlaubsplanung / Updaten im Dienstplan
+
+
 
 Abrechnungen / Rechnungen
